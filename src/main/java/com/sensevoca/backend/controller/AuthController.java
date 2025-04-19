@@ -1,5 +1,7 @@
 package com.sensevoca.backend.controller;
 
+import com.sensevoca.backend.dto.login.LoginRequestDto;
+import com.sensevoca.backend.dto.login.LoginResponseDto;
 import com.sensevoca.backend.dto.signup.SignUpRequestDto;
 import com.sensevoca.backend.dto.signup.SignUpResponseDto;
 import com.sensevoca.backend.service.AuthService;
@@ -19,6 +21,12 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<SignUpResponseDto> signup(@RequestBody SignUpRequestDto requestDto) {
         SignUpResponseDto responseDto = authService.signup(requestDto);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto requestDto) {
+        LoginResponseDto responseDto = authService.login(requestDto);
         return ResponseEntity.ok(responseDto);
     }
 }
