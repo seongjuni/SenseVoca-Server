@@ -7,7 +7,6 @@ import com.sensevoca.backend.dto.signup.SignUpRequestDto;
 import com.sensevoca.backend.dto.signup.SignUpResponseDto;
 import com.sensevoca.backend.entity.User;
 import com.sensevoca.backend.repository.UserRepository;
-import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
