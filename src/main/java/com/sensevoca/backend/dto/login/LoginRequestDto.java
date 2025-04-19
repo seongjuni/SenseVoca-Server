@@ -1,4 +1,4 @@
-package com.sensevoca.backend.dto.signup;
+package com.sensevoca.backend.dto.login;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SignUpRequestDto {
+public class LoginRequestDto {
     private String user_id;             // 유저아이디
-    private String user_name;           // 유저이름
     private String user_password;       // 유저비밀번호
     private String user_login_type;     // 로그인타입
 }
