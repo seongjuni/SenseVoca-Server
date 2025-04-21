@@ -11,27 +11,32 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "user")
+@Table(name = "users")
 public class User {
 
     @Id
-    @Column(name = "user_id")
-    private String user_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false)
+    private Long id;
 
-    @Column(name = "user_name", nullable = false)
-    private String user_name;
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
 
-    @Column(name = "user_password", nullable = false)
-    private String user_password;
+    @Column(name = "nickname", nullable = false, unique = true)
+    private String nickName;
 
-    @Column(name = "user_login_type", nullable = false)
-    private String user_login_type;
+    @Column(name = "password", nullable = false)
+    private String password;
 
-    @Column(name = "user_created_at", nullable = false, updatable = false)
-    private LocalDateTime user_created_at;
+    @Enumerated(EnumType.STRING) // ⭐ enum을 문자열로 저장 (ex: "KAKAO")
+    @Column(name = "login_type", nullable = false)
+    private LoginType loginType;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        this.user_created_at = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 }
