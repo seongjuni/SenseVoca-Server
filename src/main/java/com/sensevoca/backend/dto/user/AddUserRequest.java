@@ -11,4 +11,5 @@ public class AddUserRequest {
     private String email;
     private String nickName;
     private String password;
+    private Long interestId;
 }
