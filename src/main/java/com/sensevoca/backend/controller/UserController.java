@@ -10,28 +10,29 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "user", description = "유저 API")
-@Controller
-@RequestMapping("/user")
+@Tag(name = "users", description = "유저 API")
+@RestController
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
     @Operation(summary = "유저 회원가입")
-    public ResponseEntity<ResponseDTO<Long>> signup(@RequestBody AddUserRequest request) {
-        Long savedId = userService.save(request);
-        ResponseDTO<Long> response = new ResponseDTO<>();
-        response.setStatus(true);
-        response.setMessage("User registration successful.");
-        response.setData(savedId);
+    public ResponseEntity<ResponseDTO<Boolean>> signup(@RequestBody AddUserRequest request) {
+        boolean success = userService.save(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
+        ResponseDTO<Boolean> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage(success
+                            ? "User registration successful."
+                            : "Email already exists.");
+        response.setData(success);
+
+        return ResponseEntity
+                .status(success ? HttpStatus.CREATED : HttpStatus.CONFLICT)
                 .body(response);
     }
 
@@ -39,6 +40,7 @@ public class UserController {
     @Operation(summary = "유저 로그인")
     public ResponseEntity<ResponseDTO<LoginUserResponse>> login(@RequestBody LoginUserRequest request) {
         LoginUserResponse loginResponse = userService.login(request);
+
         ResponseDTO<LoginUserResponse> response = new ResponseDTO<>();
         response.setStatus(true);
         response.setMessage("User login successful.");
@@ -46,6 +48,21 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(response);
+    }
+
+    @GetMapping("/check-email")
+    @Operation(summary = "아이디 중복 체크")
+    public ResponseEntity<ResponseDTO<Boolean>> checkEmailDuplicate(@RequestParam String email) {
+        boolean isDuplicate = userService.isEmailDuplicate(email);
+
+        ResponseDTO<Boolean> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage(isDuplicate
+                            ? "This email is already in use."
+                            : "This email is available.");
+        response.setData(isDuplicate);
+
+        return ResponseEntity.ok(response);
     }
 
 //    @PostMapping("/oauth/kakao")

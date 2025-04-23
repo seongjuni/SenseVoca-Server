@@ -40,7 +40,7 @@ public class SecurityConfig {
                 }))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/login", "/user/signup", "/user/oauth/**").permitAll()
+                        .requestMatchers("/api/users/login", "/api/users/signup", "/api/users/oauth/**", "/api/users/check-email").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
