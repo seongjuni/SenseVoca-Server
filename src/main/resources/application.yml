@@ -11,3 +11,7 @@ spring:
   jwt:
     access-secret: h4N2oR7s2vLJ2KnY6GpMoUcKhKXLwVChgPZtsJTPA1Y=
     refresh-secret: E1wR+Ks12XsGyzMGUD9fjKg9I4rQ7sM4OzuIK3quP5k=
+
+ai:
+  server:
+    url: http://localhost:8000

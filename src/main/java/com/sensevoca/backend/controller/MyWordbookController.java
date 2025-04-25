@@ -3,6 +3,7 @@ package com.sensevoca.backend.controller;
 import com.sensevoca.backend.dto.ResponseDTO;
 import com.sensevoca.backend.dto.mywordbook.AddMyWordbookRequest;
 import com.sensevoca.backend.service.MyWordbookService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,8 @@ import org.springframework.web.bind.annotation.*;
 public class MyWordbookController {
     private final MyWordbookService myWordbookService;
 
-    @PostMapping
+    @PostMapping("/add-book")
+    @Operation(summary = "나만의 단어장 생성")
     public ResponseEntity<ResponseDTO<Long>> addMyWordbook(
             @RequestBody AddMyWordbookRequest myWordbookRequest) {
 

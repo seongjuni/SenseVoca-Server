@@ -72,7 +72,6 @@ public class UserService {
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
                 .build();
-
     }
 
     public boolean isEmailDuplicate(String email) {
