@@ -2,7 +2,7 @@ package com.sensevoca.backend.service;
 
 import com.sensevoca.backend.dto.mywordbook.AddMyWordbookRequest;
 import com.sensevoca.backend.dto.mywordbook.MyWordRequest;
-import com.sensevoca.backend.entity.*;
+import com.sensevoca.backend.domain.*;
 import com.sensevoca.backend.repository.MnemonicExampleRepository;
 import com.sensevoca.backend.repository.MyWordRepository;
 import com.sensevoca.backend.repository.MyWordbookRepository;
@@ -10,7 +10,6 @@ import com.sensevoca.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service

@@ -1,4 +1,4 @@
-package com.sensevoca.backend.entity;
+package com.sensevoca.backend.domain;
 
 import jakarta.persistence.*;
 import lombok.*;

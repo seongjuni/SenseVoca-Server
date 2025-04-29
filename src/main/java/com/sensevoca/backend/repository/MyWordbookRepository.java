@@ -1,6 +1,6 @@
 package com.sensevoca.backend.repository;
 
-import com.sensevoca.backend.entity.MyWordbook;
+import com.sensevoca.backend.domain.MyWordbook;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

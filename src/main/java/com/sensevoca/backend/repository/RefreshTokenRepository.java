@@ -1,6 +1,6 @@
 package com.sensevoca.backend.repository;
 
-import com.sensevoca.backend.entity.RefreshToken;
+import com.sensevoca.backend.domain.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

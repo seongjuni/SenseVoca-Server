@@ -1,6 +1,6 @@
 package com.sensevoca.backend.config.jwt;
 
-import com.sensevoca.backend.entity.User;
+import com.sensevoca.backend.domain.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

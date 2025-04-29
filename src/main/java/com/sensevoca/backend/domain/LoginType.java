@@ -1,4 +1,4 @@
-package com.sensevoca.backend.entity;
+package com.sensevoca.backend.domain;
 
 public enum LoginType {
     NORMAL,     // 일반 회원가입
