@@ -1,9 +1,8 @@
 package com.sensevoca.backend.repository;
 
-import com.sensevoca.backend.entity.MnemonicExample;
+import com.sensevoca.backend.domain.MnemonicExample;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface MnemonicExampleRepository extends JpaRepository<MnemonicExample, Long> {

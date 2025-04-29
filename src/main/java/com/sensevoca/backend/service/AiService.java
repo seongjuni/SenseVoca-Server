@@ -1,15 +1,12 @@
 package com.sensevoca.backend.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sensevoca.backend.dto.ai.CreateMnemonicExampleRequest;
 import com.sensevoca.backend.dto.ai.CreateMnemonicExampleResponse;
-import com.sensevoca.backend.entity.Interest;
-import com.sensevoca.backend.entity.MnemonicExample;
+import com.sensevoca.backend.domain.Interest;
+import com.sensevoca.backend.domain.MnemonicExample;
 import com.sensevoca.backend.repository.InterestRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;

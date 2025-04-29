@@ -3,7 +3,7 @@ package com.sensevoca.backend.service;
 import com.sensevoca.backend.config.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.sensevoca.backend.entity.User;
+import com.sensevoca.backend.domain.User;
 
 @Service
 @RequiredArgsConstructor

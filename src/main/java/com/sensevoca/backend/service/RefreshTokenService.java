@@ -1,6 +1,6 @@
 package com.sensevoca.backend.service;
 
-import com.sensevoca.backend.entity.RefreshToken;
+import com.sensevoca.backend.domain.RefreshToken;
 import com.sensevoca.backend.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
