@@ -8,7 +8,6 @@ import java.util.List;
 @Getter
 @Setter
 public class AddMyWordbookRequest {
-    private Long user_id;
     private String title;
     private List<MyWordRequest> words;
 }
