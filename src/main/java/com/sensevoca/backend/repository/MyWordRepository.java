@@ -3,6 +3,8 @@ package com.sensevoca.backend.repository;
 import com.sensevoca.backend.domain.MyWord;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface MyWordRepository extends JpaRepository<MyWord, Long> {
+import java.util.List;
 
+public interface MyWordRepository extends JpaRepository<MyWord, Long> {
+    List<MyWord> findAllByWordbookId(Long wordbookId);
 }
