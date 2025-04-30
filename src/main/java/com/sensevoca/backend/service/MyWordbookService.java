@@ -1,6 +1,7 @@
 package com.sensevoca.backend.service;
 
 import com.sensevoca.backend.dto.mywordbook.AddMyWordbookRequest;
+import com.sensevoca.backend.dto.mywordbook.GetMyWordbookResponse;
 import com.sensevoca.backend.dto.mywordbook.MyWordRequest;
 import com.sensevoca.backend.domain.*;
 import com.sensevoca.backend.repository.MnemonicExampleRepository;
@@ -8,9 +9,13 @@ import com.sensevoca.backend.repository.MyWordRepository;
 import com.sensevoca.backend.repository.MyWordbookRepository;
 import com.sensevoca.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +28,11 @@ public class MyWordbookService {
     private final AiService aiService;
 
     public Long addMyWordbook(AddMyWordbookRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
         // 1. 유저 조회
-        User user = userRepository.findById(request.getUser_id())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
         // 2. 유저의 관심사 조회
@@ -91,5 +99,21 @@ public class MyWordbookService {
 
         // 3. 저장 후 반환
         return mnemonicExampleRepository.save(aiGenerated);
+    }
+
+    public List<GetMyWordbookResponse> getMyWordbookList() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        List<MyWordbook> wordbooks = myWordbookRepository.findAllByUserId(userId);
+
+        return wordbooks.stream()
+                .map(wordbook -> GetMyWordbookResponse.builder()
+                        .id(wordbook.getId())
+                        .title(wordbook.getTitle())
+                        .wordCount(wordbook.getWordCount())
+                        .lastAccessedAt(wordbook.getLastAccessedAt())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

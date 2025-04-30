@@ -26,10 +26,9 @@ public class JwtUtil {
 
     // Access Token 생성
     public String createAccessToken(User user, Long expireTimeMs) {
-//        LOGGER.info("[createToken] 토큰 생성 시작");
         Claims claims = Jwts.claims();
-        claims.put("username", user.getNickName());
         claims.put("id", user.getId());
+        claims.put("username", user.getNickName());
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expireTimeMs);
 
@@ -44,15 +43,12 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS256, accessSecretKey)
                 .compact();
 
-//        LOGGER.info("[createToken] 토큰 생성 완료");
         return token;
     }
 
-    // Access Token 생성
+    // Refresh Token 생성
     public String createRefreshToken(User user, Long expireTimeMs) {
-//        LOGGER.info("[createRefreshToken] 토큰 생성 시작");
         Claims claims = Jwts.claims();
-        claims.put("username", user.getNickName());
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expireTimeMs);
 
@@ -67,15 +63,26 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS256, refreshSecretKey)
                 .compact();
 
-//        LOGGER.info("[createRefreshToken] 토큰 생성 완료");
         return token;
     }
 
     // 토큰 검증
-    public boolean validateToken(String token) {
+    public boolean validateAccessToken(String token) {
         try {
             Jwts.parser()
                     .setSigningKey(accessSecretKey)
+                    .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            LOGGER.info("[validateToken] Error: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean validateRefreshToken(String token) {
+        try {
+            Jwts.parser()
+                    .setSigningKey(refreshSecretKey)
                     .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
@@ -89,7 +96,7 @@ public class JwtUtil {
         Set<SimpleGrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
 
         return new UsernamePasswordAuthenticationToken(
-                getUsername(token),
+                getUserId(token),
                 token,
                 authorities
         );

@@ -14,13 +14,13 @@ public class JwtService {
     private final UserService userService;
 
     public String createNewAccessToken(String refreshToken) {
-        if(!jwtUtil.validateToken(refreshToken)) {
+        if(!jwtUtil.validateRefreshToken(refreshToken)) {
             throw new IllegalArgumentException("Invalid refresh token");
         }
 
         Long userId = refreshTokenService.findByRefreshToken(refreshToken).getUserId();
         User user = userService.findById(userId);
 
-        return jwtUtil.createAccessToken(user, 24 * 60 * 60 * 1000L); //
+        return jwtUtil.createAccessToken(user, 3 * 60 * 60 * 1000L); //
     }
 }

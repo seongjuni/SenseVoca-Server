@@ -30,7 +30,7 @@ public class MyWordbook {
     private String title;
 
     @Column(name = "word_count", nullable = false)
-    private int wordCount = 0;
+    private int wordCount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -42,11 +42,6 @@ public class MyWordbook {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.lastAccessedAt = this.createdAt;
-    }
-
-    // 단어 수 증가/감소 메서드 예시
-    public void addWordCount(int count) {
-        this.wordCount += count;
     }
 
     public void updateLastAccessed() {
