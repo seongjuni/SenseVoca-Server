@@ -1,7 +1,8 @@
 package com.sensevoca.backend.service;
 
 import com.sensevoca.backend.dto.mywordbook.AddMyWordbookRequest;
-import com.sensevoca.backend.dto.mywordbook.GetMyWordbookResponse;
+import com.sensevoca.backend.dto.mywordbook.GetMyWordListResponse;
+import com.sensevoca.backend.dto.mywordbook.GetMyWordbookListResponse;
 import com.sensevoca.backend.dto.mywordbook.MyWordRequest;
 import com.sensevoca.backend.domain.*;
 import com.sensevoca.backend.repository.MnemonicExampleRepository;
@@ -13,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -101,19 +103,50 @@ public class MyWordbookService {
         return mnemonicExampleRepository.save(aiGenerated);
     }
 
-    public List<GetMyWordbookResponse> getMyWordbookList() {
+    public List<GetMyWordbookListResponse> getMyWordbookList() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
 
         List<MyWordbook> wordbooks = myWordbookRepository.findAllByUserId(userId);
 
         return wordbooks.stream()
-                .map(wordbook -> GetMyWordbookResponse.builder()
+                .map(wordbook -> GetMyWordbookListResponse.builder()
                         .id(wordbook.getId())
                         .title(wordbook.getTitle())
                         .wordCount(wordbook.getWordCount())
                         .lastAccessedAt(wordbook.getLastAccessedAt())
                         .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<GetMyWordListResponse> getMyWordList(Long wordbookId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        MyWordbook wordbook = myWordbookRepository.findById(wordbookId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 단어장입니다."));
+
+        if (!wordbook.getUser().getId().equals(userId)) {
+            throw new IllegalStateException("자신의 단어장만 조회할 수 있습니다.");
+        }
+
+        // ✅ 마지막 접속일 업데이트
+        wordbook.updateLastAccessed();
+        myWordbookRepository.save(wordbook);
+
+        List<MyWord> myWords = myWordRepository.findAllByWordbookId(wordbookId);
+
+        return myWords.stream()
+                .map(myWord -> {
+                    MnemonicExample m = myWord.getMnemonic();
+                    return new GetMyWordListResponse(
+                            myWord.getId(),
+                            m.getId(),
+                            m.getWord(),
+                            m.getMeaning(),
+                            m.getPartOfSpeech()
+                    );
+                })
                 .collect(Collectors.toList());
     }
 }

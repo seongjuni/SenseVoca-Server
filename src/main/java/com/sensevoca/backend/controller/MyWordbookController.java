@@ -1,14 +1,12 @@
 package com.sensevoca.backend.controller;
 
-import com.sensevoca.backend.config.jwt.JwtFilter;
-import com.sensevoca.backend.config.jwt.JwtUtil;
 import com.sensevoca.backend.dto.ResponseDTO;
 import com.sensevoca.backend.dto.mywordbook.AddMyWordbookRequest;
-import com.sensevoca.backend.dto.mywordbook.GetMyWordbookResponse;
+import com.sensevoca.backend.dto.mywordbook.GetMyWordListResponse;
+import com.sensevoca.backend.dto.mywordbook.GetMyWordbookListResponse;
 import com.sensevoca.backend.service.MyWordbookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,13 +38,28 @@ public class MyWordbookController {
 
     @GetMapping("/list")
     @Operation(summary = "나만의 단어장 리스트")
-    public ResponseEntity<ResponseDTO<List<GetMyWordbookResponse>>> getMyWordbookList() {
-        List<GetMyWordbookResponse> wordbooks = myWordbookService.getMyWordbookList();
+    public ResponseEntity<ResponseDTO<List<GetMyWordbookListResponse>>> getMyWordbookList() {
+        List<GetMyWordbookListResponse> wordbooks = myWordbookService.getMyWordbookList();
 
-        ResponseDTO<List<GetMyWordbookResponse>> response = new ResponseDTO<>();
+        ResponseDTO<List<GetMyWordbookListResponse>> response = new ResponseDTO<>();
         response.setStatus(true);
         response.setMessage("");
         response.setData(wordbooks);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/{wordbookId}/words")
+    @Operation(summary = "나만의 단어 리스트")
+    public ResponseEntity<ResponseDTO<List<GetMyWordListResponse>>> getMyWordList(
+            @PathVariable Long wordbookId) {
+        List<GetMyWordListResponse> words = myWordbookService.getMyWordList(wordbookId);
+
+        ResponseDTO<List<GetMyWordListResponse>> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("");
+        response.setData(words);
 
         return ResponseEntity.ok(response);
     }

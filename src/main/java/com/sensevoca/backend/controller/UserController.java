@@ -50,9 +50,10 @@ public class UserController {
                 .body(response);
     }
 
-    @GetMapping("/check-email")
+    @GetMapping("/{email}/check-email")
     @Operation(summary = "아이디 중복 체크")
-    public ResponseEntity<ResponseDTO<Boolean>> checkEmailDuplicate(@RequestParam String email) {
+    public ResponseEntity<ResponseDTO<Boolean>> checkEmailDuplicate(
+            @PathVariable String email) {
         boolean isDuplicate = userService.isEmailDuplicate(email);
 
         ResponseDTO<Boolean> response = new ResponseDTO<>();
