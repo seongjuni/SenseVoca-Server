@@ -38,12 +38,13 @@ public class AiService {
                 .meaning(meaning)
                 .exampleKor(response.getExampleKor())
                 .exampleEng(response.getExampleEng())
+                .association(response.getAssociation())
                 .imageUrl(response.getImageUrl())
                 .partOfSpeech(response.getPartOfSpeech())
                 .phoneticUs(response.getPhoneticUs())
                 .phoneticUk(response.getPhoneticUk())
                 .phoneticAus(response.getPhoneticAus())
-                .interest(Interest.builder().id(interestId).build()) // interest 객체가 필요하다면 이렇게
+                .interest(Interest.builder().id(interestId).build())
                 .createdAt(LocalDateTime.now())
                 .build();
     }

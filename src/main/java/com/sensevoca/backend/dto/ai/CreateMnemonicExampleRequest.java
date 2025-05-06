@@ -12,5 +12,5 @@ import lombok.Setter;
 public class CreateMnemonicExampleRequest {
     private String word;
     private String meaning;
-    private String interestId;
+    private String interest;
 }

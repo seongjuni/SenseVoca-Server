@@ -43,6 +43,9 @@ public class MnemonicExample {
     @Column(name = "phonetic_aus", length = 100)
     private String phoneticAus;
 
+    @Column(name = "association", columnDefinition = "TEXT")  // ✅ 추가된 부분
+    private String association;
+
     @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 

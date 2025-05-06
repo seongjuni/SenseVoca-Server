@@ -136,7 +136,7 @@ public class MyWordbookService {
 
         List<MyWord> myWords = myWordRepository.findAllByWordbookId(wordbookId);
 
-        return myWords.stream()
+        List<GetMyWordListResponse> result = myWords.stream()
                 .map(myWord -> {
                     MnemonicExample m = myWord.getMnemonic();
                     return new GetMyWordListResponse(
@@ -148,5 +148,13 @@ public class MyWordbookService {
                     );
                 })
                 .collect(Collectors.toList());
+
+// ✅ 최종 반환 리스트 출력
+        System.out.println("==== 변환된 단어 리스트 ====");
+        for (GetMyWordListResponse wordResponse : result) {
+            System.out.println(wordResponse);
+        }
+
+        return result;
     }
 }
