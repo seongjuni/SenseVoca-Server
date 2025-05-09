@@ -10,9 +10,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetMyWordListResponse {
-    private Long wordId;
-    private Long mnemonicId;
+    private Long myWordId;
+    private Long myWordMnemonicId;
     private String word;         // 단어
     private String meaning;      // 뜻
-    private String partOfSpeech; // 품사
 }

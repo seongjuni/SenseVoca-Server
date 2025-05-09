@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface MyWordbookRepository extends JpaRepository<MyWordbook, Long> {
-    List<MyWordbook> findAllByUserId(Long userId);
+    List<MyWordbook> findAllByUserUserId(Long userId);
 }

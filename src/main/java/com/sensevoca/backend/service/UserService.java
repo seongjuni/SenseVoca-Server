@@ -59,14 +59,14 @@ public class UserService {
         String accessToken = jwtUtil.createAccessToken(user, accessExpireTimeMs);
         String refreshToken = jwtUtil.createRefreshToken(user, refreshExpireTimeMs);
 
-        refreshTokenRepository.findByUserId(user.getId())
+        refreshTokenRepository.findByUserId(user.getUserId())
                 .ifPresentOrElse(
                         token -> refreshTokenRepository.save(token.update(refreshToken)),
-                        () -> refreshTokenRepository.save(new RefreshToken(user.getId(), refreshToken))
+                        () -> refreshTokenRepository.save(new RefreshToken(user.getUserId(), refreshToken))
                 );
 
         return LoginUserResponse.builder()
-                .userId(user.getId())
+                .userId(user.getUserId())
                 .email(user.getEmail())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

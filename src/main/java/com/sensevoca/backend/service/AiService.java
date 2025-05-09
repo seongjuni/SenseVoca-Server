@@ -1,9 +1,12 @@
 package com.sensevoca.backend.service;
 
+import com.sensevoca.backend.domain.MyWordMnemonic;
+import com.sensevoca.backend.domain.WordInfo;
 import com.sensevoca.backend.dto.ai.CreateMnemonicExampleRequest;
 import com.sensevoca.backend.dto.ai.CreateMnemonicExampleResponse;
 import com.sensevoca.backend.domain.Interest;
-import com.sensevoca.backend.domain.MnemonicExample;
+import com.sensevoca.backend.dto.ai.GetWordPhoneticsRequest;
+import com.sensevoca.backend.dto.ai.GetWordPhoneticsResponse;
 import com.sensevoca.backend.repository.InterestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,13 +21,26 @@ public class AiService {
     private final WebClient webClient;
     private final InterestRepository interestRepository;
 
-    public MnemonicExample generateMnemonicExample(String word, Long interestId, String meaning) {
+    public GetWordPhoneticsResponse getWordPhonetics(String word, String meaning) {
+        GetWordPhoneticsRequest request = new GetWordPhoneticsRequest(word, meaning);
+
+        GetWordPhoneticsResponse response = webClient.post()
+                .uri("/api/ai/word-phonetics")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(GetWordPhoneticsResponse.class)
+                .block();
+
+        return response;
+    }
+
+    public MyWordMnemonic generateMnemonicExample(WordInfo wordinfo, Long interestId, String meaning) {
         Interest interest = interestRepository.findById(interestId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 관심사를 찾을 수 없습니다: id=" + interestId));
 
         String interestType = interest.getType();
 
-        CreateMnemonicExampleRequest request = new CreateMnemonicExampleRequest(word, meaning, interestType);
+        CreateMnemonicExampleRequest request = new CreateMnemonicExampleRequest(wordinfo.getWord(), meaning, interestType);
 
         CreateMnemonicExampleResponse response = webClient.post()
                 .uri("/api/ai/generate-mnemonic")
@@ -33,18 +49,14 @@ public class AiService {
                 .bodyToMono(CreateMnemonicExampleResponse.class)
                 .block(); // 동기적으로 응답 받을 때 사용
 
-        return MnemonicExample.builder()
-                .word(word)
+        return MyWordMnemonic.builder()
+                .wordInfo(wordinfo)
+                .interest(interest)
                 .meaning(meaning)
+                .association(response.getAssociation())
                 .exampleKor(response.getExampleKor())
                 .exampleEng(response.getExampleEng())
-                .association(response.getAssociation())
                 .imageUrl(response.getImageUrl())
-                .partOfSpeech(response.getPartOfSpeech())
-                .phoneticUs(response.getPhoneticUs())
-                .phoneticUk(response.getPhoneticUk())
-                .phoneticAus(response.getPhoneticAus())
-                .interest(Interest.builder().id(interestId).build())
                 .createdAt(LocalDateTime.now())
                 .build();
     }

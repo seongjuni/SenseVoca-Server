@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MyWordRequest {
+    private Long wordId;
     private String word;
     private String meaning;
 }

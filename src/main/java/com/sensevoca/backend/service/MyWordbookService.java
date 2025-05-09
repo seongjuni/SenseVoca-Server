@@ -1,20 +1,13 @@
 package com.sensevoca.backend.service;
 
-import com.sensevoca.backend.dto.mywordbook.AddMyWordbookRequest;
-import com.sensevoca.backend.dto.mywordbook.GetMyWordListResponse;
-import com.sensevoca.backend.dto.mywordbook.GetMyWordbookListResponse;
-import com.sensevoca.backend.dto.mywordbook.MyWordRequest;
+import com.sensevoca.backend.dto.mywordbook.*;
 import com.sensevoca.backend.domain.*;
-import com.sensevoca.backend.repository.MnemonicExampleRepository;
-import com.sensevoca.backend.repository.MyWordRepository;
-import com.sensevoca.backend.repository.MyWordbookRepository;
-import com.sensevoca.backend.repository.UserRepository;
+import com.sensevoca.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,12 +17,14 @@ import java.util.stream.Collectors;
 public class MyWordbookService {
 
     private final UserRepository userRepository;
+    private final WordInfoRepository wordInfoRepository;
     private final MyWordbookRepository myWordbookRepository;
-    private final MnemonicExampleRepository mnemonicExampleRepository;
-    private final MyWordRepository myWordRepository;
+    private final MyWordMnemonicRepository myWordMnemonicRepository;
+    private final WordInfoService wordInfoService;
     private final AiService aiService;
+    private final MyWordRepository myWordRepository;
 
-    public Long addMyWordbook(AddMyWordbookRequest request) {
+    public Boolean addMyWordbook(AddMyWordbookRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
 
@@ -43,11 +38,6 @@ public class MyWordbookService {
             throw new IllegalStateException("유저의 관심사가 설정되지 않았습니다.");
         }
 
-        // 우선 관심사랑 단어가 같은 경선식 찾고 없으면 요청 있으면 가져다 씀
-        // 2. Ai에게 단어, 뜻, 관심사를 전달하여 경선식 문장, 이미지 프롬프트, 품사, 발음기호, 영어 예문, 예문 번역 생성 요청
-        // 비동기로 처리 순서는 유지
-
-
         MyWordbook wordbook = myWordbookRepository.save(
                 MyWordbook.builder()
                         .user(user)
@@ -58,28 +48,38 @@ public class MyWordbookService {
 
         // 3. 단어 목록 순회하며 예문 처리 및 관계 저장
         for (MyWordRequest wordItem : request.getWords()) {
-            // 3-1. 기존 예문이 있으면 사용, 없으면 AI로 생성
-            MnemonicExample example = findOrGenerateMnemonicExample(
-                    wordItem.getWord(),
-                    interest.getId(),
-                    wordItem.getMeaning()
-            );
+            // 1. 단어 정보 준비
+            WordInfo wordInfo;
+            if (wordItem.getWordId() == null) {
+                wordInfo = wordInfoService.findOrGenerateWordInfo(wordItem.getWord(), wordItem.getMeaning());
+            } else {
+                wordInfo = wordInfoRepository.findById(wordItem.getWordId())
+                        .orElseThrow(() -> new IllegalArgumentException("단어를 찾을 수 없습니다: " + wordItem.getWordId()));
+            }
+
+            // 2. 연상 예문, 이미지, 영어/한글 예문 준비
+            MyWordMnemonic myWordMnemonic = findOrGenerateMnemonicExample(
+                    wordInfo,
+                    interest.getInterestId(),
+                    wordItem.getMeaning(),
+                    wordbook
+                    );
 
             myWordRepository.save(
                     MyWord.builder()
-                            .wordbook(wordbook)
-                            .mnemonic(example)
+                            .myWordbook(wordbook)
+                            .myWordMnemonic(myWordMnemonic)
                             .build()
             );
         }
 
-        return wordbook.getId();
+        return true;
     }
 
-    public MnemonicExample findOrGenerateMnemonicExample(String word, Long interestId, String meaning) {
+    public MyWordMnemonic findOrGenerateMnemonicExample(WordInfo wordInfo, Long interestId, String meaning, MyWordbook myWordbook) {
 
-        Optional<MnemonicExample> optionalExample =
-                mnemonicExampleRepository.findByWordAndInterestIdAndMeaning(word, interestId, meaning);
+        Optional<MyWordMnemonic> optionalExample =
+                myWordMnemonicRepository.findByWordInfoWordIdAndInterestInterestIdAndMeaning(wordInfo.getWordId(), interestId, meaning);
 
         if (optionalExample.isPresent()) {
             return optionalExample.get(); // ✅ 동일한 예문이 있으면 그대로 반환
@@ -97,21 +97,21 @@ public class MyWordbookService {
 //        }
 
         // 2. 없으면 AI에게 요청해서 생성
-        MnemonicExample aiGenerated = aiService.generateMnemonicExample(word, interestId, meaning);
+        MyWordMnemonic aiGenerated = aiService.generateMnemonicExample(wordInfo, interestId, meaning);
 
         // 3. 저장 후 반환
-        return mnemonicExampleRepository.save(aiGenerated);
+        return myWordMnemonicRepository.save(aiGenerated);
     }
 
     public List<GetMyWordbookListResponse> getMyWordbookList() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
 
-        List<MyWordbook> wordbooks = myWordbookRepository.findAllByUserId(userId);
+        List<MyWordbook> wordbooks = myWordbookRepository.findAllByUserUserId(userId);
 
         return wordbooks.stream()
                 .map(wordbook -> GetMyWordbookListResponse.builder()
-                        .id(wordbook.getId())
+                        .id(wordbook.getMyWordbookId())
                         .title(wordbook.getTitle())
                         .wordCount(wordbook.getWordCount())
                         .lastAccessedAt(wordbook.getLastAccessedAt())
@@ -124,37 +124,64 @@ public class MyWordbookService {
         Long userId = (Long) authentication.getPrincipal();
 
         MyWordbook wordbook = myWordbookRepository.findById(wordbookId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 단어장입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("단어장이 존재하지 않습니다."));
 
-        if (!wordbook.getUser().getId().equals(userId)) {
+        if (!wordbook.getUser().getUserId().equals(userId)) {
             throw new IllegalStateException("자신의 단어장만 조회할 수 있습니다.");
         }
 
-        // ✅ 마지막 접속일 업데이트
+        // 마지막 접속일 업데이트
         wordbook.updateLastAccessed();
         myWordbookRepository.save(wordbook);
 
-        List<MyWord> myWords = myWordRepository.findAllByWordbookId(wordbookId);
+        List<MyWord> myWords = myWordRepository.findAllByMyWordbookMyWordbookId(wordbookId);
 
         List<GetMyWordListResponse> result = myWords.stream()
                 .map(myWord -> {
-                    MnemonicExample m = myWord.getMnemonic();
+                    MyWordMnemonic m = myWord.getMyWordMnemonic();
                     return new GetMyWordListResponse(
-                            myWord.getId(),
-                            m.getId(),
-                            m.getWord(),
-                            m.getMeaning(),
-                            m.getPartOfSpeech()
+                            myWord.getMyWordId(),
+                            m.getMyWordMnemonicId(),
+                            m.getWordInfo().getWord(),
+                            m.getMeaning()
                     );
                 })
                 .collect(Collectors.toList());
 
-// ✅ 최종 반환 리스트 출력
+        // 최종 반환 리스트 출력
         System.out.println("==== 변환된 단어 리스트 ====");
         for (GetMyWordListResponse wordResponse : result) {
             System.out.println(wordResponse);
         }
 
         return result;
+    }
+
+    public List<GetMyWordInfoResponse> getMyWordInfoList(List<Long> wordIds, String phoneticType) {
+        List<MyWord> myWords = myWordRepository.findAllById(wordIds);
+
+        return myWords.stream()
+                .map(myWord -> {
+                    MyWordMnemonic mnemonic = myWord.getMyWordMnemonic();
+                    WordInfo wordInfo = mnemonic.getWordInfo();
+                    String phoneticSymbol = switch (phoneticType.toLowerCase()) {
+                        case "uk" -> wordInfo.getPhoneticUk();
+                        case "aus" -> wordInfo.getPhoneticAus();
+                        default -> wordInfo.getPhoneticUs(); // 기본 미국식
+                    };
+
+                    return GetMyWordInfoResponse.builder()
+                            .wordId(myWord.getMyWordId())
+                            .word(wordInfo.getWord())
+                            .meaning(mnemonic.getMeaning())
+                            .phoneticSymbol(phoneticSymbol)
+                            .association(mnemonic.getAssociation())
+                            .imageUrl(mnemonic.getImageUrl())
+                            .exampleEng(mnemonic.getExampleEng())
+                            .exampleKor(mnemonic.getExampleKor())
+//                            .favorite(false) // 즐겨찾기 로직은 따로
+                            .build();
+                })
+                .toList();
     }
 }

@@ -8,11 +8,12 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "interests")
+@Table(name = "interest")
 public class Interest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "interest_id")
+    private Long interestId;
 
     @Column(name = "type", nullable = false, unique = true, length = 100)
     private String type; // 예: 축구, 여행, 음악, 영어

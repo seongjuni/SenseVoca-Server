@@ -27,7 +27,7 @@ public class JwtUtil {
     // Access Token 생성
     public String createAccessToken(User user, Long expireTimeMs) {
         Claims claims = Jwts.claims();
-        claims.put("id", user.getId());
+        claims.put("id", user.getUserId());
         claims.put("username", user.getNickName());
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expireTimeMs);

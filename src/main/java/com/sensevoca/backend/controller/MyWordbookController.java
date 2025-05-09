@@ -1,9 +1,7 @@
 package com.sensevoca.backend.controller;
 
+import com.sensevoca.backend.dto.mywordbook.*;
 import com.sensevoca.backend.dto.ResponseDTO;
-import com.sensevoca.backend.dto.mywordbook.AddMyWordbookRequest;
-import com.sensevoca.backend.dto.mywordbook.GetMyWordListResponse;
-import com.sensevoca.backend.dto.mywordbook.GetMyWordbookListResponse;
 import com.sensevoca.backend.service.MyWordbookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,15 +21,15 @@ public class MyWordbookController {
 
     @PostMapping("/add-book")
     @Operation(summary = "나만의 단어장 생성")
-    public ResponseEntity<ResponseDTO<Long>> addMyWordbook(
+    public ResponseEntity<ResponseDTO<Boolean>> addMyWordbook(
             @RequestBody AddMyWordbookRequest myWordbookRequest) {
 
-        Long wordbookId = myWordbookService.addMyWordbook(myWordbookRequest);
+        Boolean isAdded = myWordbookService.addMyWordbook(myWordbookRequest);
 
-        ResponseDTO<Long> response = new ResponseDTO<>();
+        ResponseDTO<Boolean> response = new ResponseDTO<>();
         response.setStatus(true);
         response.setMessage("");
-        response.setData(wordbookId);
+        response.setData(isAdded);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -64,4 +62,18 @@ public class MyWordbookController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/myword-info")
+    @Operation(summary = "나만의 단어 상세정보")
+    public ResponseEntity<ResponseDTO<List<GetMyWordInfoResponse>>> getWordInfoList(
+            @RequestBody GetMyWordInfoRequest request) {
+
+        List<GetMyWordInfoResponse> wordInfos = myWordbookService.getMyWordInfoList(request.getWordIds(), request.getPhoneticType());
+
+        ResponseDTO<List<GetMyWordInfoResponse>> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("");
+        response.setData(wordInfos);
+
+        return ResponseEntity.ok(response);
+    }
 }

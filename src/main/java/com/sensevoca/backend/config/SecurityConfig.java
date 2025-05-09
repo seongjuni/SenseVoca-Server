@@ -43,7 +43,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/users/login",
                                      "/api/users/signup",
                                      "/api/users/oauth/**",
-                                     "/api/users/check-email",
+                                     "/api/users/*/check-email",
                                      "/api/users/token").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()

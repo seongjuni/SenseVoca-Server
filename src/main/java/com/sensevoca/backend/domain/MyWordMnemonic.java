@@ -10,40 +10,36 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "mnemonic_example")
-public class MnemonicExample {
+@Table(name = "my_word_mnemonic")
+public class MyWordMnemonic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "my_word_mnemonic_id")
+    private Long myWordMnemonicId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "word_id",
+            foreignKey = @ForeignKey(
+                    name = "fk_myword_wordinfo",
+                    foreignKeyDefinition = "FOREIGN KEY (word_id) REFERENCES word_info(word_id) ON DELETE CASCADE"
+            )
+    )
+    private WordInfo wordInfo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interest_id",
             foreignKey = @ForeignKey(
                     name = "fk_mnemonic_interest",
-                    foreignKeyDefinition = "FOREIGN KEY (interest_id) REFERENCES interests(id) ON DELETE SET NULL"
+                    foreignKeyDefinition = "FOREIGN KEY (interest_id) REFERENCES interest(id) ON DELETE SET NULL"
             )
     )
     private Interest interest;
 
-    @Column(nullable = false, length = 100)
-    private String word;
-
-    @Column(nullable = false, length = 255)
+    @Column(name = "meaning", nullable = false, length = 100)
     private String meaning;
 
-    @Column(name = "part_of_speech", length = 50)
-    private String partOfSpeech;
-
-    @Column(name = "phonetic_us", length = 100)
-    private String phoneticUs;
-
-    @Column(name = "phonetic_uk", length = 100)
-    private String phoneticUk;
-
-    @Column(name = "phonetic_aus", length = 100)
-    private String phoneticAus;
-
-    @Column(name = "association", columnDefinition = "TEXT")  // ✅ 추가된 부분
+    @Column(name = "association", columnDefinition = "TEXT")
     private String association;
 
     @Column(name = "image_url", columnDefinition = "TEXT")
