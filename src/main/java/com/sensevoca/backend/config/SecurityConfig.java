@@ -31,7 +31,9 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.setAllowedOrigins(Arrays.asList(
                         "http://localhost:3000",
-                        "http://localhost:8080"
+                        "http://localhost:8080",
+                        "http://52.78.176.186",         // ← 여기에 추가
+                        "http://52.78.176.186:8080"
                 ));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(Arrays.asList("*"));
@@ -40,11 +42,13 @@ public class SecurityConfig {
             }))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/users/login",
-                                     "/api/users/signup",
-                                     "/api/users/oauth/**",
-                                     "/api/users/*/check-email",
-                                     "/api/users/token").permitAll()
+                    .requestMatchers(
+                            "/",
+                            "/index.html",
+                            "/v3/**",
+                            "/swagger-ui/**",
+                            "/api/users/**",
+                            "/api/users/token").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()
             )
