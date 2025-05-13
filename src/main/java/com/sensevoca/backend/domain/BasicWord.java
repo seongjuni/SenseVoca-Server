@@ -12,21 +12,29 @@ import lombok.*;
 public class BasicWord {
 
     @Id
-    @Column(name = "word_id")
-    private Long wordId;
+    @Column(name = "basic_word_id")
+    private Long basicWordId;
 
-    @Column(nullable = false, length = 100)
-    private String word;
+    @OneToOne
+    @JoinColumn(name = "word_id")
+    private WordInfo wordInfo;
 
-    @Column(name = "association", columnDefinition = "TEXT")
+    @Column(name = "meaning", nullable = false)
+    private String meaning;
+
+    @Column(name = "association", nullable = false, columnDefinition = "TEXT")
     private String association;
 
-    @Column(name = "image_url", columnDefinition = "TEXT")
+    @Column(name = "association_eng", nullable = false)
+    private String associationEng;
+
+    @Column(name = "image_url", nullable = false , columnDefinition = "TEXT")
     private String imageUrl;
 
-    @Column(name = "example_eng", columnDefinition = "TEXT")
+    @Column(name = "example_eng", nullable = false , columnDefinition = "TEXT")
     private String exampleEng;
 
-    @Column(name = "example_kor", columnDefinition = "TEXT")
+    @Column(name = "example_kor", nullable = false , columnDefinition = "TEXT")
     private String exampleKor;
+
 }

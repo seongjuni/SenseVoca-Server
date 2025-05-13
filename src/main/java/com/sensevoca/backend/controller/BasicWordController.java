@@ -1,8 +1,7 @@
 package com.sensevoca.backend.controller;
 
 import com.sensevoca.backend.dto.ResponseDTO;
-import com.sensevoca.backend.dto.basicword.GetBasicWordListResponse;
-import com.sensevoca.backend.dto.mywordbook.GetMyWordbookListResponse;
+import com.sensevoca.backend.dto.basicword.GetBasicWordResponse;
 import com.sensevoca.backend.service.BasicWordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,10 +22,10 @@ public class BasicWordController {
 
     @GetMapping("/list")
     @Operation(summary = "기본제공 단어장 리스트")
-    public ResponseEntity<ResponseDTO<List<GetBasicWordListResponse>>> getBasicWordList() {
-        List<GetBasicWordListResponse> wordbooks = basicWordService.getBasicWordList();
+    public ResponseEntity<ResponseDTO<List<GetBasicWordResponse>>> getBasicWordList() {
+        List<GetBasicWordResponse> wordbooks = basicWordService.getBasicWordList();
 
-        ResponseDTO<List<GetBasicWordListResponse>> response = new ResponseDTO<>();
+        ResponseDTO<List<GetBasicWordResponse>> response = new ResponseDTO<>();
         response.setStatus(true);
         response.setMessage("");
         response.setData(wordbooks);
