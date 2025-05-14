@@ -165,6 +165,7 @@ public class MyWordbookService {
                     MyWordMnemonic mnemonic = myWord.getMyWordMnemonic();
                     WordInfo wordInfo = mnemonic.getWordInfo();
                     String phoneticSymbol = switch (phoneticType.toLowerCase()) {
+                        case "us" -> wordInfo.getPhoneticUs();
                         case "uk" -> wordInfo.getPhoneticUk();
                         case "aus" -> wordInfo.getPhoneticAus();
                         default -> wordInfo.getPhoneticUs(); // 기본 미국식
