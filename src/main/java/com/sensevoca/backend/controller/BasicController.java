@@ -20,7 +20,7 @@ public class BasicController {
     private final BasicService basicService;
 
     // [1] [BASIC] 기본 제공 단어장 목록 조회
-    @GetMapping("")
+    @GetMapping("/list")
     @Operation(summary = "기본 제공 단어장 목록 & Daylist 개수")
     public ResponseEntity<ResponseDTO<List<GetBasicResponse>>> getBasic()
     {

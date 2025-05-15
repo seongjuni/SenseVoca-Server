@@ -25,7 +25,7 @@ public class AiService {
         GetWordPhoneticsRequest request = new GetWordPhoneticsRequest(word, meaning);
 
         GetWordPhoneticsResponse response = webClient.post()
-                .uri("/api/ai/word-phonetics")
+                .uri("/api/v1/ai/word-phonetics")
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(GetWordPhoneticsResponse.class)
@@ -43,7 +43,7 @@ public class AiService {
         CreateMnemonicExampleRequest request = new CreateMnemonicExampleRequest(wordinfo.getWord(), meaning, interestType);
 
         CreateMnemonicExampleResponse response = webClient.post()
-                .uri("/api/ai/generate-mnemonic")
+                .uri("/api/v1/ai/generate-mnemonic")
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(CreateMnemonicExampleResponse.class)
@@ -52,7 +52,7 @@ public class AiService {
         return MyWordMnemonic.builder()
                 .wordInfo(wordinfo)
                 .interest(interest)
-                .meaning(meaning)
+                .meaning(response.getMeaning())
                 .association(response.getAssociation())
                 .exampleKor(response.getExampleKor())
                 .exampleEng(response.getExampleEng())
