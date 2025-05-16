@@ -61,8 +61,7 @@ public class MyWordbookService {
             MyWordMnemonic myWordMnemonic = findOrGenerateMnemonicExample(
                     wordInfo,
                     interest.getInterestId(),
-                    wordItem.getMeaning(),
-                    wordbook
+                    wordItem.getMeaning()
                     );
 
             myWordRepository.save(
@@ -76,7 +75,7 @@ public class MyWordbookService {
         return true;
     }
 
-    public MyWordMnemonic findOrGenerateMnemonicExample(WordInfo wordInfo, Long interestId, String meaning, MyWordbook myWordbook) {
+    public MyWordMnemonic findOrGenerateMnemonicExample(WordInfo wordInfo, Long interestId, String meaning) {
 
         Optional<MyWordMnemonic> optionalExample =
                 myWordMnemonicRepository.findByWordInfoWordIdAndInterestInterestIdAndMeaning(wordInfo.getWordId(), interestId, meaning);
