@@ -5,6 +5,7 @@ import com.sensevoca.backend.dto.basicword.*;
 import com.sensevoca.backend.service.BasicService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,21 @@ public class BasicController {
         return ResponseEntity.ok(response);
     }
 
-    // [2] [DAYLIST] 목록 조회 + 최근 접근 시간 UPDATE
+    // [2-1] [DAYLIST] daylist 목록 조회 + dayword 수
+    @GetMapping("/{basic_id}/daylist/")
+    @Operation(summary = "Daylist 목록 & Dayword 개수")
+    public ResponseEntity<ResponseDTO<List<GetDaylistResponse>>> getDaylist(@PathVariable("basic_id") Long basicId)
+    {
+        List<GetDaylistResponse> result = basicService.getDaylist(basicId);
+
+        ResponseDTO<List<GetDaylistResponse>> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("Daylist 목록 조회 성공");
+        response.setData(result);
+        return ResponseEntity.ok(response);
+    }
+
+    // [2-2] [DAYLIST] 마지막 접근 시간 UPDATE
     @PatchMapping("/{basic_id}/daylist/{daylist_id}/accessed")
     @Operation(summary = "Daylist 목록 & 최근 접근 시간 업데이터 & Dayword 개수")
     public ResponseEntity<ResponseDTO<List<GetDaylistResponse>>> getDaylistWithTime(
@@ -43,19 +58,18 @@ public class BasicController {
     {
         basicService.updateDatetime(daylistId, request.getLatestAccessedAt());
 
-        List<GetDaylistResponse> result = basicService.getDaylist(basicId);
+        List<GetDaylistResponse> result = basicService.getDaylistWithTime(basicId);
 
         ResponseDTO<List<GetDaylistResponse>> response = new ResponseDTO<>();
         response.setStatus(true);
-        response.setMessage("기본 제공 단어장의 Daylist 목록 조회 성공");
+        response.setMessage("Daylist 마지막 접근 시간 PATCH 성공");
         response.setData(result);
         return ResponseEntity.ok(response);
     }
 
-
-    // [3] [DAYWORD] 목록 조회
+    // [3] [DAYWORD] dayword 목록 조회
     @GetMapping("{daylist_id}/dayword")
-    @Operation(summary = "Dayword 목록")
+    @Operation(summary = "Dayword 목록 조회")
     public ResponseEntity<ResponseDTO<List<GetDaywordResponse>>> getDayword(@PathVariable("daylist_id") Long daylistId)
     {
         List<GetDaywordResponse> result = basicService.getDayword(daylistId);
@@ -68,18 +82,18 @@ public class BasicController {
     }
 
     // [4] [BASIC WORD] 단어 상세 정보 조회
-    @GetMapping("{daylist_id}/basic_word/{country}")
-    @Operation(summary = "기본 제공 단어 상세 정보")
+    @PostMapping("/basic_word/{country}")
+    @Operation(summary = "daywordId로 기본 제공 단어 상세 정보 조회")
     public ResponseEntity<ResponseDTO<List<GetBasicWordResponse>>> getBasicWord(
-            @PathVariable("daylist_id") Long daylistId, @PathVariable("country") String country)
+            @RequestBody BasicWordIdRequest request,
+            @PathVariable("country") String country)
     {
-        List<GetBasicWordResponse> result = basicService.getBasicWord(daylistId, country);
+        List<GetBasicWordResponse> result = basicService.getBasicWord(request.getDaywordId(), country);
 
         ResponseDTO<List<GetBasicWordResponse>> response = new ResponseDTO<>();
         response.setStatus(true);
-        response.setMessage("기본 제공 단어 상세 정보");
+        response.setMessage("기본 제공 단어 상세 정보 조회 성공");
         response.setData(result);
         return ResponseEntity.ok(response);
     }
-
 }

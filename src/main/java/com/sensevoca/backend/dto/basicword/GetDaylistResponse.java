@@ -15,7 +15,6 @@ public class GetDaylistResponse {
 
     private Long daylistId;
     private String daylistTitle;
-    private String basicTitle;
     private LocalDateTime latestAccessedAt;
     private Integer daywordCount;
 

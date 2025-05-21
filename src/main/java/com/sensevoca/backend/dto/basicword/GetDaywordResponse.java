@@ -12,7 +12,6 @@ import lombok.Setter;
 public class GetDaywordResponse {
 
     private Long daywordId;
-    private String daylistTitle;
     private String word;
     private String meaning;
 }

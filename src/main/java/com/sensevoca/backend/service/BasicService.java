@@ -30,7 +30,7 @@ public class BasicService {
     private final DaywordRepository daywordRepository;
     private final BasicWordRepository  basicWordRepository;
 
-    // [1] [BASIC] 기본 제공 단어장 목록 조회
+    // [1] [BASIC] 기본 제공 단어장 목록 조회 + daylist 수
     public List<GetBasicResponse> getBasic()
     {
         List<Basic> basicList = basicRepository.findAll();
@@ -49,8 +49,26 @@ public class BasicService {
                 .collect(Collectors.toList());
     }
 
-    // [2] [DAYLIST] 목록 조회
+    // [2-1] [DAYLIST] daylist 목록 조회 + dayword 수
     public List<GetDaylistResponse> getDaylist(Long basicId)
+    {
+        List<Daylist> dayList = daylistRepository.findAllByBasicBasicId(basicId);
+
+        return dayList.stream()
+                .map(daylist -> {
+                    int count = daywordRepository.countByDaylistDaylistId(daylist.getDaylistId());
+                    return GetDaylistResponse.builder()
+                            .daylistId(daylist.getDaylistId())
+                            .daylistTitle(daylist.getDaylistTitle())
+                            .latestAccessedAt(daylist.getLatestAccessedAt())
+                            .daywordCount(count)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    // [2-2] [DAYLIST] 마지막 접근 시간 UPDATE
+    public List<GetDaylistResponse> getDaylistWithTime(Long basicId)
     {
         List<Daylist> dayList = daylistRepository.findAllByBasicBasicId(basicId);
 
@@ -59,7 +77,6 @@ public class BasicService {
                     int count = daywordRepository.countByDaylistDaylistId(daylist.getDaylistId());
                     return GetDaylistResponse.builder()
                             .daylistId(daylist.getDaylistId())
-                            .basicTitle(daylist.getBasic().getBasicTitle())
                             .daylistTitle(daylist.getDaylistTitle())
                             .daywordCount(count)
                             .latestAccessedAt(daylist.getLatestAccessedAt())
@@ -76,7 +93,7 @@ public class BasicService {
         daylistRepository.save(daylist);
     }
 
-    // [3] [DAYWORD] 목록 조회
+    // [3] [DAYWORD] dayword 목록 조회
     public List<GetDaywordResponse> getDayword(Long daylistId)
     {
         List<Dayword> daywordList = daywordRepository.findAllByDaylistDaylistId(daylistId);
@@ -85,7 +102,6 @@ public class BasicService {
                 .map(dayword -> {
                     return GetDaywordResponse.builder()
                             .daywordId(dayword.getDaywordId())
-                            .daylistTitle(dayword.getDaylist().getDaylistTitle())
                             .word(dayword.getBasicWord().getWordInfo().getWord())
                             .meaning(dayword.getBasicWord().getMeaning())
                             .build();
@@ -94,10 +110,9 @@ public class BasicService {
     }
 
     // [4] [BASIC WORD] 단어 상세 정보 조회
-    public List<GetBasicWordResponse> getBasicWord(Long daylistId, String country)
+    public List<GetBasicWordResponse> getBasicWord(List<Long> daywordIdList, String country)
     {
-        // 흐름 : daylist -> basicword -> wordinfo
-        List<Dayword> daywordDetail = daywordRepository.findAllByDaylistDaylistId(daylistId);
+        List<Dayword> daywordDetail = daywordRepository.findAllById(daywordIdList);
 
         return daywordDetail.stream().map(dayword -> {
             BasicWord basicWord = dayword.getBasicWord();
@@ -117,7 +132,6 @@ public class BasicService {
                     .word(wordInfo.getWord())
                     .meaning(basicWord.getMeaning())
                     .association(basicWord.getAssociation())
-                    .associationEng(basicWord.getAssociationEng())
                     .imageUrl(basicWord.getImageUrl())
                     .exampleEng(basicWord.getExampleEng())
                     .exampleKor(basicWord.getExampleKor())

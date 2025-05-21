@@ -13,7 +13,6 @@ public class GetBasicWordResponse {
     private String word;    // word_info
     private String meaning;
     private String association;
-    private String associationEng;
     private String imageUrl;
     private String exampleEng;
     private String exampleKor;
