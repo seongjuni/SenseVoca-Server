@@ -31,7 +31,7 @@ public class FavoriteWordService {
         MyWordMnemonic myWordMnemonic = myWordMnemonicRepository.findById(myWordMnemonicId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 나만의 단어가 존재하지 않습니다."));
 
-        if (favoriteWordRepository.existsByUserIdAndMyWordMnemonicId(userId, myWordMnemonicId)) {
+        if (favoriteWordRepository.existsByUser_UserIdAndMyWordMnemonic_MyWordMnemonicId(userId, myWordMnemonicId)) {
             throw new IllegalStateException("이미 즐겨찾기 되어 있음");
         }
 

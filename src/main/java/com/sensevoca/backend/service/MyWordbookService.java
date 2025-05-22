@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +24,7 @@ public class MyWordbookService {
     private final WordInfoService wordInfoService;
     private final AiService aiService;
     private final MyWordRepository myWordRepository;
+    private final FavoriteWordRepository favoriteWordRepository;
 
     public Boolean addMyWordbook(AddMyWordbookRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -141,7 +143,6 @@ public class MyWordbookService {
                     MyWordMnemonic m = myWord.getMyWordMnemonic();
                     return new GetMyWordListResponse(
                             myWord.getMyWordId(),
-                            m.getMyWordMnemonicId(),
                             m.getWordInfo().getWord(),
                             m.getMeaning()
                     );
@@ -158,7 +159,22 @@ public class MyWordbookService {
     }
 
     public List<GetMyWordInfoResponse> getMyWordInfoList(List<Long> wordIds, String phoneticType) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
         List<MyWord> myWords = myWordRepository.findAllById(wordIds);
+
+        // 즐겨찾기된 myWordMnemonicId를 한 번에 조회
+        Set<Long> favoriteMnemonicIds = favoriteWordRepository
+                .findAllByUser_UserIdAndMyWordMnemonic_MyWordMnemonicIdIn(
+                        userId,
+                        myWords.stream()
+                                .map(word -> word.getMyWordMnemonic().getMyWordMnemonicId())
+                                .toList()
+                )
+                .stream()
+                .map(fav -> fav.getMyWordMnemonic().getMyWordMnemonicId())
+                .collect(Collectors.toSet());
 
         return myWords.stream()
                 .map(myWord -> {
@@ -171,6 +187,8 @@ public class MyWordbookService {
                         default -> wordInfo.getPhoneticUs(); // 기본 미국식
                     };
 
+                    boolean isFavorite = favoriteMnemonicIds.contains(mnemonic.getMyWordMnemonicId());
+
                     return GetMyWordInfoResponse.builder()
                             .wordId(myWord.getMyWordId())
                             .word(wordInfo.getWord())
@@ -180,7 +198,7 @@ public class MyWordbookService {
                             .imageUrl(mnemonic.getImageUrl())
                             .exampleEng(mnemonic.getExampleEng())
                             .exampleKor(mnemonic.getExampleKor())
-//                            .favorite(false) // 즐겨찾기 로직은 따로
+                            .favorite(isFavorite)
                             .build();
                 })
                 .toList();

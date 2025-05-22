@@ -17,15 +17,15 @@ public class FavoriteWordController {
 
     private final FavoriteWordService favoriteWordService;
 
-    @PostMapping("/add-myword")
+    @PostMapping("/add-myword/{myWordMnemonicId}")
     @Operation(summary = "내 단어 즐겨찾기 등록")
-    public ResponseEntity<ResponseDTO<Void>> addMyWordFavorite(@RequestParam Long myWordMnemonicId) {
+    public ResponseEntity<ResponseDTO<Void>> addMyWordFavorite(@PathVariable Long myWordMnemonicId) {
         favoriteWordService.addMyWordFavorite(myWordMnemonicId);
 
         ResponseDTO<Void> response = new ResponseDTO<>();
         response.setStatus(true);
         response.setMessage("나만의 단어 즐겨찾기 등록 완료");
-        response.setData();
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(response);
     }

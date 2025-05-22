@@ -14,5 +14,5 @@ public class GetMyWordInfoResponse {
     private String imageUrl;         // 이미지 URL
     private String exampleEng;       // 영어 예문
     private String exampleKor;       // 예문 번역
-//    private boolean favorite;        // 즐겨찾기 여부
+    private boolean favorite;        // 즐겨찾기 여부
 }
