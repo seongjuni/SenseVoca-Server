@@ -47,7 +47,6 @@ public class MyWordbookController {
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/{wordbookId}/words")
     @Operation(summary = "나만의 단어 리스트")
     public ResponseEntity<ResponseDTO<List<GetMyWordListResponse>>> getMyWordList(
