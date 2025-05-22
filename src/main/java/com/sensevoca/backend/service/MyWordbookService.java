@@ -113,6 +113,7 @@ public class MyWordbookService {
                         .id(wordbook.getMyWordbookId())
                         .title(wordbook.getTitle())
                         .wordCount(wordbook.getWordCount())
+                        .createdAt(wordbook.getCreatedAt())
                         .lastAccessedAt(wordbook.getLastAccessedAt())
                         .build())
                 .collect(Collectors.toList());
