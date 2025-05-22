@@ -11,7 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class GetMyWordListResponse {
     private Long myWordId;
-    private Long myWordMnemonicId;
     private String word;         // 단어
     private String meaning;      // 뜻
 }
