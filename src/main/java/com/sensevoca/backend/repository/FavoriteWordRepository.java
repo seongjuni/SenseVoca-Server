@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FavoriteWordRepository extends JpaRepository<FavoriteWord, Long>  {
+    boolean existsByUserIdAndMyWordMnemonicId(Long userId, Long myWordMnemonicId);
 }
