@@ -66,7 +66,17 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping ("/{id}")
+    @Operation(summary = "유저 회원탈퇴")
+    public ResponseEntity<ResponseDTO<Void>> delete(@PathVariable Long id) {
+        userService.delete(id);
+        ResponseDTO<Void> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("User deletion successful.");
 
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(response);
+    }
 
 //    @PostMapping("/oauth/kakao")
 //    public ResponseEntity<LoginResponseDto> kakaoLogin(@RequestBody KakaoLoginRequestDto requestDto) {

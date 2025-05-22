@@ -91,4 +91,8 @@ public class UserService {
     public void deleteAll() {
         userRepository.deleteAll();
     }
+
+    public void delete(Long userId) {
+        userRepository.deleteById(userId);
+    }
 }
