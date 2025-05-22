@@ -13,5 +13,6 @@ public class GetMyWordbookListResponse {
     private Long id;
     private String title;
     private int wordCount;
+    private LocalDateTime createdAt;
     private LocalDateTime lastAccessedAt;
 }
