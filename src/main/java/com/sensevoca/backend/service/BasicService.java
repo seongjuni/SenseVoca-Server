@@ -122,7 +122,7 @@ public class BasicService {
             String phonetic = switch (country.toLowerCase())
             {
                 case "us" -> wordInfo.getPhoneticUs();
-                case "en" -> wordInfo.getPhoneticUk();
+                case "uk" -> wordInfo.getPhoneticUk();
                 case "aus" -> wordInfo.getPhoneticAus();
                 default -> wordInfo.getPhoneticUs();
             };
