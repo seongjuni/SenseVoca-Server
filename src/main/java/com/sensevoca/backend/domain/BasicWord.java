@@ -25,9 +25,6 @@ public class BasicWord {
     @Column(name = "association", nullable = false, columnDefinition = "TEXT")
     private String association;
 
-    @Column(name = "association_eng", nullable = false)
-    private String associationEng;
-
     @Column(name = "image_url", nullable = false , columnDefinition = "TEXT")
     private String imageUrl;
 

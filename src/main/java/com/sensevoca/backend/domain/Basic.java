@@ -28,5 +28,4 @@ public class Basic {
 
     @Column(name = "basic_offered_by", nullable = false)
     private String basicOfferedBy;
-
 }
