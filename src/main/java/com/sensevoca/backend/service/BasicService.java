@@ -6,18 +6,13 @@ import com.sensevoca.backend.dto.basicword.GetBasicWordResponse;
 import com.sensevoca.backend.dto.basicword.GetDaylistResponse;
 import com.sensevoca.backend.dto.basicword.GetDaywordResponse;
 import com.sensevoca.backend.repository.BasicRepository;
-import com.sensevoca.backend.repository.BasicWordRepository;
 import com.sensevoca.backend.repository.DaylistRepository;
 import com.sensevoca.backend.repository.DaywordRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.sql.results.graph.basic.BasicResult;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +23,6 @@ public class BasicService {
     private final BasicRepository basicRepository;
     private final DaylistRepository daylistRepository;
     private final DaywordRepository daywordRepository;
-    private final BasicWordRepository  basicWordRepository;
 
     // [1] [BASIC] 기본 제공 단어장 목록 조회 + daylist 수
     public List<GetBasicResponse> getBasic()
