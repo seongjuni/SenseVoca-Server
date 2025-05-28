@@ -16,4 +16,11 @@ public interface FavoriteWordRepository extends JpaRepository<FavoriteWord, Long
     List<FavoriteWord> findAllByUser_UserId(Long userId);
 
     Optional<FavoriteWord> findByUser_UserIdAndMyWordMnemonic_MyWordMnemonicId(Long userId, Long myWordMnemonicId);
+
+    // 기본 단어장
+    // 1. user_id가 basic_word를 즐겨찾기 했는지 여부
+    boolean existsByUser_UserIdAndBasicWord_BasicWordId(Long userId, Long basicWordId);
+    // 2. user_id가 갖고 있는 하나의 basic_word_id 조회 (삭제용)
+    Optional<FavoriteWord> findByUser_UserIdAndBasicWord_BasicWordId(Long userId, Long basicWordId);
+
 }

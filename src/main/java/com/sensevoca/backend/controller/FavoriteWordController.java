@@ -2,7 +2,6 @@ package com.sensevoca.backend.controller;
 
 import com.sensevoca.backend.dto.ResponseDTO;
 import com.sensevoca.backend.dto.favoriteword.GetFavoriteWordsResponse;
-import com.sensevoca.backend.dto.mywordbook.GetMyWordbookListResponse;
 import com.sensevoca.backend.service.FavoriteWordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -52,6 +51,19 @@ public class FavoriteWordController {
 //    @Operation(summary = "기본 단어 즐겨찾기 등록")
 //    public ResponseEntity<ResponseDTO<Void>> addBasicWordFavorite(@RequestParam Long basicWordId) {
 //    }
+    @PostMapping("/add-basicword/{basicWordId}")
+    @Operation(summary = "기본 단어 즐겨찾기 등록")
+    public ResponseEntity<ResponseDTO<Void>> addBasicWordFavorite(@PathVariable Long basicWordId)
+    {
+        favoriteWordService.addBasicWordFavorite(basicWordId);
+
+        ResponseDTO<Void> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("기본 단어 즐겨찾기 등록 완료");
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(response);
+    }
 
     @DeleteMapping("/remove-myword/{myWordMnemonicId}")
     @Operation(summary = "내 단어 즐겨찾기 삭제")
@@ -61,6 +73,19 @@ public class FavoriteWordController {
         ResponseDTO<Void> response = new ResponseDTO<>();
         response.setStatus(true);
         response.setMessage("나만의 단어 즐겨찾기 삭제 완료");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/remove-basicword/{basicWordId}")
+    @Operation(summary = "기본 단어 즐겨찾기 삭제")
+    public ResponseEntity<ResponseDTO<Void>> removeBasicWordFavorite(@PathVariable Long basicWordId)
+    {
+        favoriteWordService.removeBasicWordFavorite(basicWordId);
+
+        ResponseDTO<Void> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("기본 단어 즐겨찾기 삭제 완료");
 
         return ResponseEntity.ok(response);
     }

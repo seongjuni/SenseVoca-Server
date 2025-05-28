@@ -1,10 +1,8 @@
 package com.sensevoca.backend.service;
 
-import com.sensevoca.backend.domain.FavoriteWord;
-import com.sensevoca.backend.domain.MyWordMnemonic;
-import com.sensevoca.backend.domain.User;
-import com.sensevoca.backend.domain.WordInfo;
+import com.sensevoca.backend.domain.*;
 import com.sensevoca.backend.dto.favoriteword.GetFavoriteWordsResponse;
+import com.sensevoca.backend.repository.BasicWordRepository;
 import com.sensevoca.backend.repository.FavoriteWordRepository;
 import com.sensevoca.backend.repository.MyWordMnemonicRepository;
 import com.sensevoca.backend.repository.UserRepository;
@@ -23,6 +21,7 @@ public class FavoriteWordService {
     private final FavoriteWordRepository favoriteWordRepository;
     private final UserRepository userRepository;
     private final MyWordMnemonicRepository myWordMnemonicRepository;
+    private final BasicWordRepository basicWordRepository;
 
     public List<GetFavoriteWordsResponse> getFavoriteWordsByUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -77,12 +76,50 @@ public class FavoriteWordService {
         favoriteWordRepository.save(favorite);
     }
 
+    public void addBasicWordFavorite(Long basicWordId)
+    {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        // 1. User 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+        // 2. 기본 단어장 조회
+        BasicWord basicWord = basicWordRepository.findById(basicWordId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 기본 단어가 존재하지 않습니다."));
+
+        if (favoriteWordRepository.existsByUser_UserIdAndBasicWord_BasicWordId(userId, basicWordId))
+            throw new IllegalStateException("이미 즐겨찾기 되어 있음");
+
+        FavoriteWord favorite = FavoriteWord.builder()
+                .user(user)
+                .basicWord(basicWord)
+                .build();
+
+        favoriteWordRepository.save(favorite);
+    }
+
     public void removeMyWordFavorite(Long myWordMnemonicId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
 
         Optional<FavoriteWord> optionalFavorite = favoriteWordRepository
                 .findByUser_UserIdAndMyWordMnemonic_MyWordMnemonicId(userId, myWordMnemonicId);
+
+        FavoriteWord favorite = optionalFavorite
+                .orElseThrow(() -> new IllegalArgumentException("즐겨찾기 항목이 존재하지 않습니다."));
+
+        favoriteWordRepository.delete(favorite);
+    }
+
+    public void removeBasicWordFavorite(Long basicWordId)
+    {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        Optional<FavoriteWord> optionalFavorite = favoriteWordRepository.
+                findByUser_UserIdAndBasicWord_BasicWordId(userId, basicWordId);
 
         FavoriteWord favorite = optionalFavorite
                 .orElseThrow(() -> new IllegalArgumentException("즐겨찾기 항목이 존재하지 않습니다."));
