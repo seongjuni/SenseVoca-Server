@@ -75,4 +75,19 @@ public class MyWordbookController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{count}/random-myword")
+    @Operation(summary = "랜덤 나만의 단어장", description = "사용자의 나만의 단어 중 랜덤으로 N개 반환")
+    public ResponseEntity<ResponseDTO<List<GetRandomWordResponse>>> getRandomMyWords(
+            @PathVariable int count) {
+
+        List<GetRandomWordResponse> result = myWordbookService.getRandomMyWords(count);
+
+        ResponseDTO<List<GetRandomWordResponse>> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("랜덤 단어 반환 성공");
+        response.setData(result);
+
+        return ResponseEntity.ok(response);
+    }
 }

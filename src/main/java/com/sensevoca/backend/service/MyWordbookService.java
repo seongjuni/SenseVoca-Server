@@ -2,15 +2,14 @@ package com.sensevoca.backend.service;
 
 import com.sensevoca.backend.dto.mywordbook.*;
 import com.sensevoca.backend.domain.*;
+import com.sensevoca.backend.dto.wordinfo.GetWordInfosResponse;
 import com.sensevoca.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,10 +20,11 @@ public class MyWordbookService {
     private final WordInfoRepository wordInfoRepository;
     private final MyWordbookRepository myWordbookRepository;
     private final MyWordMnemonicRepository myWordMnemonicRepository;
-    private final WordInfoService wordInfoService;
-    private final AiService aiService;
     private final MyWordRepository myWordRepository;
     private final FavoriteWordRepository favoriteWordRepository;
+    private final BasicWordRepository basicWordRepository;
+    private final WordInfoService wordInfoService;
+    private final AiService aiService;
 
     public Boolean addMyWordbook(AddMyWordbookRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -202,5 +202,31 @@ public class MyWordbookService {
                             .build();
                 })
                 .toList();
+    }
+
+    public List<GetRandomWordResponse> getRandomMyWords(int count) {
+        List<GetWordInfosResponse> allWords = basicWordRepository.findAll().stream()
+                .map(basicWord -> {
+                    WordInfo wordInfo = basicWord.getWordInfo();
+                    return GetWordInfosResponse.builder()
+                            .wordId(wordInfo.getWordId())
+                            .word(wordInfo.getWord())
+                            .meaning(basicWord.getMeaning())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        // 섞기
+        Collections.shuffle(allWords);
+
+        // count만큼 잘라서 변환
+        return allWords.stream()
+                .limit(count)
+                .map(word -> GetRandomWordResponse.builder()
+                        .wordId(word.getWordId())
+                        .word(word.getWord())
+                        .meaning(word.getMeaning())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
