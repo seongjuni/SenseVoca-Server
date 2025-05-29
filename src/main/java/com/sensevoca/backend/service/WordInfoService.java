@@ -1,19 +1,38 @@
 package com.sensevoca.backend.service;
 
+import com.sensevoca.backend.domain.BasicWord;
 import com.sensevoca.backend.domain.WordInfo;
 import com.sensevoca.backend.dto.ai.GetWordPhoneticsResponse;
+import com.sensevoca.backend.dto.wordinfo.GetWordInfosResponse;
+import com.sensevoca.backend.repository.BasicWordRepository;
 import com.sensevoca.backend.repository.WordInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class WordInfoService {
 
-    private final AiService aiService;
     private final WordInfoRepository wordInfoRepository;
+    private final BasicWordRepository basicWordRepository;
+    private final AiService aiService;
+
+    public List<GetWordInfosResponse> getAllWordInfos() {
+        return basicWordRepository.findAll().stream()
+                .map(basicWord -> {
+                    WordInfo wordInfo = basicWord.getWordInfo();
+                    return GetWordInfosResponse.builder()
+                            .wordId(wordInfo.getWordId())
+                            .word(wordInfo.getWord())
+                            .meaning(basicWord.getMeaning())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
 
     public WordInfo findOrGenerateWordInfo(String word, String meaning) {
         // 1. AI 서비스에 요청해서 발음 정보 받아오기
