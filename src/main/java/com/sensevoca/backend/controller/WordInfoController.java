@@ -19,7 +19,7 @@ public class WordInfoController {
 
     private final WordInfoService wordInfoService;
 
-    @PostMapping("/list")
+    @GetMapping("/list")
     @Operation(summary = "단어 리스트 조회")
     public ResponseEntity<ResponseDTO<List<GetWordInfosResponse>>> getAllWordInfos() {
         List<GetWordInfosResponse> wordInfos = wordInfoService.getAllWordInfos();
