@@ -49,21 +49,17 @@ public class BasicController {
     }
 
     // [2-2] [DAYLIST] 마지막 접근 시간 UPDATE
-    @PatchMapping("/{basic_id}/daylist/{daylist_id}/accessed")
+    @PatchMapping("{daylist_id}/accessed")
     @Operation(summary = "Daylist 목록 & 최근 접근 시간 업데이터 & Dayword 개수")
-    public ResponseEntity<ResponseDTO<List<GetDaylistResponse>>> getDaylistWithTime(
-            @PathVariable("basic_id") Long basicId,
+    public ResponseEntity<ResponseDTO<Void>> updateDatetime(
             @PathVariable("daylist_id") Long daylistId,
             @RequestBody UpdateDatetimeRequest request)
     {
         basicService.updateDatetime(daylistId, request.getLatestAccessedAt());
 
-        List<GetDaylistResponse> result = basicService.getDaylistWithTime(basicId);
-
-        ResponseDTO<List<GetDaylistResponse>> response = new ResponseDTO<>();
+        ResponseDTO<Void> response = new ResponseDTO<>();
         response.setStatus(true);
-        response.setMessage("Daylist 마지막 접근 시간 PATCH 성공");
-        response.setData(result);
+        response.setMessage("Daylist 마지막 접근 시간 업데이트 성공");
         return ResponseEntity.ok(response);
     }
 
