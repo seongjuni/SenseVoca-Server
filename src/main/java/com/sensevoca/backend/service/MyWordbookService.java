@@ -191,6 +191,7 @@ public class MyWordbookService {
 
                     return GetMyWordInfoResponse.builder()
                             .wordId(myWord.getMyWordId())
+                            .mnemonicId(mnemonic.getMyWordMnemonicId())
                             .word(wordInfo.getWord())
                             .meaning(mnemonic.getMeaning())
                             .phoneticSymbol(phoneticSymbol)

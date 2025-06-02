@@ -7,6 +7,7 @@ import lombok.Getter;
 @Builder
 public class GetMyWordInfoResponse {
     private Long wordId;             // 단어 id
+    private Long mnemonicId;
     private String word;             // 영어 단어
     private String meaning;          // 뜻
     private String phoneticSymbol;   // 발음기호 (us, uk, aus 중 요청에 따라)
