@@ -230,4 +230,18 @@ public class MyWordbookService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    public void deleteMyWord(Long wordbookId, Long wordId) {
+        // 1. 단어 존재 여부 및 소속 확인
+        MyWord myWord = myWordRepository.findById(wordId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 단어입니다."));
+
+        // 2. 단어장 단어 존재 여부 확인
+        if (!myWord.getMyWordbook().getMyWordbookId().equals(wordbookId)) {
+            throw new IllegalArgumentException("단어가 해당 단어장에 속하지 않습니다.");
+        }
+
+        // 3. 삭제
+        myWordRepository.delete(myWord);
+    }
 }
