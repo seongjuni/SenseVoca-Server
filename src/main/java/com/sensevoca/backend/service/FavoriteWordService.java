@@ -1,18 +1,22 @@
 package com.sensevoca.backend.service;
 
 import com.sensevoca.backend.domain.*;
+import com.sensevoca.backend.dto.basicword.GetBasicWordResponse;
+import com.sensevoca.backend.dto.favoriteword.FavoriteWordDetailResponse;
 import com.sensevoca.backend.dto.favoriteword.GetFavoriteWordsResponse;
-import com.sensevoca.backend.repository.BasicWordRepository;
-import com.sensevoca.backend.repository.FavoriteWordRepository;
-import com.sensevoca.backend.repository.MyWordMnemonicRepository;
-import com.sensevoca.backend.repository.UserRepository;
+import com.sensevoca.backend.dto.favoriteword.WordIdTypeRequest;
+import com.sensevoca.backend.dto.mywordbook.GetMyWordInfoResponse;
+import com.sensevoca.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ public class FavoriteWordService {
     private final UserRepository userRepository;
     private final MyWordMnemonicRepository myWordMnemonicRepository;
     private final BasicWordRepository basicWordRepository;
+    private final MyWordRepository myWordRepository;
 
     public List<GetFavoriteWordsResponse> getFavoriteWordsByUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -126,4 +131,91 @@ public class FavoriteWordService {
 
         favoriteWordRepository.delete(favorite);
     }
+
+    public List<FavoriteWordDetailResponse> getFavoriteWordInfoList(
+            List<WordIdTypeRequest> wordIdTypes, String phoneticType) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        List<FavoriteWordDetailResponse> result = new ArrayList<>();
+
+        // 미리 즐겨찾기된 MY 단어 예문 ID 추출
+        List<Long> myWordIds = wordIdTypes.stream()
+                .filter(w -> "MY".equalsIgnoreCase(w.getType()))
+                .map(WordIdTypeRequest::getWordId)
+                .toList();
+
+        Set<Long> favoriteMyMnemonicIds = favoriteWordRepository
+                .findAllByUser_UserIdAndMyWordMnemonic_MyWordMnemonicIdIn(
+                        userId,
+                        myWordRepository.findAllById(myWordIds).stream()
+                                .map(my -> my.getMyWordMnemonic().getMyWordMnemonicId())
+                                .toList()
+                )
+                .stream()
+                .map(fav -> fav.getMyWordMnemonic().getMyWordMnemonicId())
+                .collect(Collectors.toSet());
+
+        for (WordIdTypeRequest req : wordIdTypes) {
+            String type = req.getType().toUpperCase();
+
+            if ("MY".equals(type)) {
+                MyWord myWord = myWordRepository.findById(req.getWordId())
+                        .orElseThrow(() -> new IllegalArgumentException("MY 단어가 존재하지 않습니다."));
+
+                MyWordMnemonic mnemonic = myWord.getMyWordMnemonic();
+                WordInfo wordInfo = mnemonic.getWordInfo();
+
+                String phoneticSymbol = switch (phoneticType.toLowerCase()) {
+                    case "uk" -> wordInfo.getPhoneticUk();
+                    case "aus" -> wordInfo.getPhoneticAus();
+                    default -> wordInfo.getPhoneticUs();
+                };
+
+                GetMyWordInfoResponse data = GetMyWordInfoResponse.builder()
+                        .wordId(myWord.getMyWordId())
+                        .mnemonicId(mnemonic.getMyWordMnemonicId())
+                        .word(wordInfo.getWord())
+                        .meaning(mnemonic.getMeaning())
+                        .phoneticSymbol(phoneticSymbol)
+                        .association(mnemonic.getAssociation())
+                        .imageUrl(mnemonic.getImageUrl())
+                        .exampleEng(mnemonic.getExampleEng())
+                        .exampleKor(mnemonic.getExampleKor())
+                        .favorite(favoriteMyMnemonicIds.contains(mnemonic.getMyWordMnemonicId()))
+                        .build();
+
+                result.add(new FavoriteWordDetailResponse("MY", data));
+            }
+
+            else if ("BASIC".equals(type)) {
+                BasicWord basicWord = basicWordRepository.findById(req.getWordId())
+                        .orElseThrow(() -> new IllegalArgumentException("기본 단어가 존재하지 않습니다."));
+
+                WordInfo wordInfo = basicWord.getWordInfo();
+
+                String phonetic = switch (phoneticType.toLowerCase()) {
+                    case "uk" -> wordInfo.getPhoneticUk();
+                    case "aus" -> wordInfo.getPhoneticAus();
+                    default -> wordInfo.getPhoneticUs();
+                };
+
+                GetBasicWordResponse data = GetBasicWordResponse.builder()
+                        .basicWordId(basicWord.getBasicWordId())
+                        .word(wordInfo.getWord())
+                        .meaning(basicWord.getMeaning())
+                        .association(basicWord.getAssociation())
+                        .imageUrl(basicWord.getImageUrl())
+                        .exampleEng(basicWord.getExampleEng())
+                        .exampleKor(basicWord.getExampleKor())
+                        .phonetic(phonetic)
+                        .build();
+
+                result.add(new FavoriteWordDetailResponse("BASIC", data));
+            }
+        }
+        return result;
+    }
+
 }
