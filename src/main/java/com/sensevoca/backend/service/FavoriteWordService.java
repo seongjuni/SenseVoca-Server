@@ -29,7 +29,7 @@ public class FavoriteWordService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
 
-        List<FavoriteWord> favorites = favoriteWordRepository.findAllByUser_UserId(userId);
+        List<FavoriteWord> favorites = favoriteWordRepository.findAllByUser_UserIdOrderByCreatedAtAsc(userId);
 
         return favorites.stream()
                 .map(fav -> {
@@ -152,7 +152,7 @@ public class FavoriteWordService {
 
         // BASIC 즐겨찾기 ID 수집
         Set<Long> favoriteBasicWordIds = favoriteWordRepository
-                .findAllByUser_UserId(userId).stream()
+                .findAllByUser_UserIdOrderByCreatedAtAsc(userId).stream()
                 .map(fav -> {
                     BasicWord basicWord = fav.getBasicWord();
                     return basicWord != null ? basicWord.getBasicWordId() : null;

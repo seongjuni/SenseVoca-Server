@@ -14,7 +14,7 @@ public interface FavoriteWordRepository extends JpaRepository<FavoriteWord, Long
 
     List<FavoriteWord> findAllByUser_UserIdAndMyWordMnemonic_MyWordMnemonicIdIn(Long userId, List<Long> ids);
 
-    List<FavoriteWord> findAllByUser_UserId(Long userId);
+    List<FavoriteWord> findAllByUser_UserIdOrderByCreatedAtAsc(Long userId);
 
     Optional<FavoriteWord> findByUser_UserIdAndMyWordMnemonic_MyWordMnemonicId(Long userId, Long myWordMnemonicId);
 
