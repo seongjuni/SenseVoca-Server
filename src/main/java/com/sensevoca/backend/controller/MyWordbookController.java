@@ -119,4 +119,20 @@ public class MyWordbookController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{wordbookId}/rename")
+    @Operation(summary = "나만의 단어장 이름 수정")
+    public ResponseEntity<ResponseDTO<Boolean>> renameMyWordbook(
+            @PathVariable Long wordbookId,
+            @RequestBody RenameMyWordbookRequest request) {
+
+        boolean renamed = myWordbookService.renameMyWordbook(wordbookId, request.getTitle());
+
+        ResponseDTO<Boolean> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("단어장 이름 수정 완료");
+        response.setData(renamed);
+
+        return ResponseEntity.ok(response);
+    }
 }
