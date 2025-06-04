@@ -1,6 +1,8 @@
 package com.sensevoca.backend.controller;
 
+import com.sensevoca.backend.dto.favoriteword.FavoriteWordDetailResponse;
 import com.sensevoca.backend.dto.ResponseDTO;
+import com.sensevoca.backend.dto.favoriteword.GetFavoriteWordInfoRequest;
 import com.sensevoca.backend.dto.favoriteword.GetFavoriteWordsResponse;
 import com.sensevoca.backend.service.FavoriteWordService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,10 +49,6 @@ public class FavoriteWordController {
                 .body(response);
     }
 
-//    @PostMapping("/add-basicword")
-//    @Operation(summary = "기본 단어 즐겨찾기 등록")
-//    public ResponseEntity<ResponseDTO<Void>> addBasicWordFavorite(@RequestParam Long basicWordId) {
-//    }
     @PostMapping("/add-basicword/{basicWordId}")
     @Operation(summary = "기본 단어 즐겨찾기 등록")
     public ResponseEntity<ResponseDTO<Void>> addBasicWordFavorite(@PathVariable Long basicWordId)
@@ -86,6 +84,24 @@ public class FavoriteWordController {
         ResponseDTO<Void> response = new ResponseDTO<>();
         response.setStatus(true);
         response.setMessage("기본 단어 즐겨찾기 삭제 완료");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/word-info")
+    @Operation(summary = "즐겨찾기 단어 상세정보 조회", description = "MY 또는 BASIC 타입에 따라 즐겨찾기 단어 상세정보를 조회")
+    public ResponseEntity<ResponseDTO<List<FavoriteWordDetailResponse>>> getFavoriteWordInfoList(
+            @RequestBody GetFavoriteWordInfoRequest request) {
+
+        List<FavoriteWordDetailResponse> wordInfos = favoriteWordService.getFavoriteWordInfoList(
+                request.getWordIdTypes(),
+                request.getPhoneticType()
+        );
+
+        ResponseDTO<List<FavoriteWordDetailResponse>> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("즐겨찾기 단어 상세정보 조회 성공");
+        response.setData(wordInfos);
 
         return ResponseEntity.ok(response);
     }
