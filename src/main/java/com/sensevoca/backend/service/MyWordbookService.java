@@ -262,4 +262,20 @@ public class MyWordbookService {
         // 단어는 DB가 자동 삭제 처리
         myWordbookRepository.delete(wordbook);
     }
+
+    @Transactional
+    public boolean renameMyWordbook(Long wordbookId, String title) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        MyWordbook wordbook = myWordbookRepository.findById(wordbookId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 단어장입니다."));
+
+        if (!wordbook.getUser().getUserId().equals(userId)) {
+            throw new IllegalStateException("자신의 단어장만 수정할 수 있습니다.");
+        }
+
+        wordbook.updateTitle(title);
+        return true;
+    }
 }
