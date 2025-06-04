@@ -12,10 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -157,6 +154,15 @@ public class FavoriteWordService {
                 .map(fav -> fav.getMyWordMnemonic().getMyWordMnemonicId())
                 .collect(Collectors.toSet());
 
+        Set<Long> favoriteBasicWordIds = favoriteWordRepository
+                .findAllByUser_UserId(userId).stream()
+                .map(fav -> {
+                    BasicWord basicWord = fav.getBasicWord();
+                    return basicWord != null ? basicWord.getBasicWordId() : null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
         for (WordIdTypeRequest req : wordIdTypes) {
             String type = req.getType().toUpperCase();
 
@@ -210,6 +216,7 @@ public class FavoriteWordService {
                         .exampleEng(basicWord.getExampleEng())
                         .exampleKor(basicWord.getExampleKor())
                         .phonetic(phonetic)
+                        .favorite(favoriteBasicWordIds.contains(basicWord.getBasicWordId()))
                         .build();
 
                 result.add(new FavoriteWordDetailResponse("BASIC", data));
