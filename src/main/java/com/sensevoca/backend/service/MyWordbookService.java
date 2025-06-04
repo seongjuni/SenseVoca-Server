@@ -4,6 +4,7 @@ import com.sensevoca.backend.dto.mywordbook.*;
 import com.sensevoca.backend.domain.*;
 import com.sensevoca.backend.dto.wordinfo.GetWordInfosResponse;
 import com.sensevoca.backend.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -231,6 +232,7 @@ public class MyWordbookService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void deleteMyWord(Long wordbookId, Long wordId) {
         // 1. 단어 존재 여부 및 소속 확인
         MyWord myWord = myWordRepository.findById(wordId)
@@ -243,5 +245,21 @@ public class MyWordbookService {
 
         // 3. 삭제
         myWordRepository.delete(myWord);
+    }
+
+    @Transactional
+    public void deleteMyWordbook(Long wordbookId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        MyWordbook wordbook = myWordbookRepository.findById(wordbookId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 단어장입니다."));
+
+        if (!wordbook.getUser().getUserId().equals(userId)) {
+            throw new IllegalStateException("자신의 단어장만 삭제할 수 있습니다.");
+        }
+
+        // 단어는 DB가 자동 삭제 처리
+        myWordbookRepository.delete(wordbook);
     }
 }
