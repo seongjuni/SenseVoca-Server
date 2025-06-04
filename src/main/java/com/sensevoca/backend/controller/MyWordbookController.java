@@ -90,4 +90,20 @@ public class MyWordbookController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{wordbookId}/words/{wordId}")
+    @Operation(summary = "나만의 단어 삭제")
+    public ResponseEntity<ResponseDTO<Void>> deleteMyWord(
+            @PathVariable Long wordbookId,
+            @PathVariable Long wordId) {
+
+        myWordbookService.deleteMyWord(wordbookId, wordId);
+
+        ResponseDTO<Void> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("단어 삭제 완료");
+        response.setData(null);
+
+        return ResponseEntity.ok(response);
+    }
 }
