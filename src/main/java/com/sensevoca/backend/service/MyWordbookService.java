@@ -191,7 +191,6 @@ public class MyWordbookService {
                     boolean isFavorite = favoriteMnemonicIds.contains(mnemonic.getMyWordMnemonicId());
 
                     return GetMyWordInfoResponse.builder()
-                            .wordId(myWord.getMyWordId())
                             .mnemonicId(mnemonic.getMyWordMnemonicId())
                             .word(wordInfo.getWord())
                             .meaning(mnemonic.getMeaning())

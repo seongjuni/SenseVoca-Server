@@ -137,23 +137,20 @@ public class FavoriteWordService {
 
         List<FavoriteWordDetailResponse> result = new ArrayList<>();
 
-        // 미리 즐겨찾기된 MY 단어 예문 ID 추출
-        List<Long> myWordIds = wordIdTypes.stream()
+        // 요청에서 MY 타입의 MyWordMnemonicId 수집
+        List<Long> myMnemonicIds = wordIdTypes.stream()
                 .filter(w -> "MY".equalsIgnoreCase(w.getType()))
                 .map(WordIdTypeRequest::getWordId)
                 .toList();
 
+        // 해당하는 즐겨찾기 MY 니모닉 ID
         Set<Long> favoriteMyMnemonicIds = favoriteWordRepository
-                .findAllByUser_UserIdAndMyWordMnemonic_MyWordMnemonicIdIn(
-                        userId,
-                        myWordRepository.findAllById(myWordIds).stream()
-                                .map(my -> my.getMyWordMnemonic().getMyWordMnemonicId())
-                                .toList()
-                )
+                .findAllByUser_UserIdAndMyWordMnemonic_MyWordMnemonicIdIn(userId, myMnemonicIds)
                 .stream()
                 .map(fav -> fav.getMyWordMnemonic().getMyWordMnemonicId())
                 .collect(Collectors.toSet());
 
+        // BASIC 즐겨찾기 ID 수집
         Set<Long> favoriteBasicWordIds = favoriteWordRepository
                 .findAllByUser_UserId(userId).stream()
                 .map(fav -> {
@@ -167,10 +164,9 @@ public class FavoriteWordService {
             String type = req.getType().toUpperCase();
 
             if ("MY".equals(type)) {
-                MyWord myWord = myWordRepository.findById(req.getWordId())
-                        .orElseThrow(() -> new IllegalArgumentException("MY 단어가 존재하지 않습니다."));
+                MyWordMnemonic mnemonic = myWordMnemonicRepository.findById(req.getWordId())
+                        .orElseThrow(() -> new IllegalArgumentException("MY 니모닉이 존재하지 않습니다."));
 
-                MyWordMnemonic mnemonic = myWord.getMyWordMnemonic();
                 WordInfo wordInfo = mnemonic.getWordInfo();
 
                 String phoneticSymbol = switch (phoneticType.toLowerCase()) {
@@ -180,7 +176,6 @@ public class FavoriteWordService {
                 };
 
                 GetMyWordInfoResponse data = GetMyWordInfoResponse.builder()
-                        .wordId(myWord.getMyWordId())
                         .mnemonicId(mnemonic.getMyWordMnemonicId())
                         .word(wordInfo.getWord())
                         .meaning(mnemonic.getMeaning())
@@ -222,6 +217,7 @@ public class FavoriteWordService {
                 result.add(new FavoriteWordDetailResponse("BASIC", data));
             }
         }
+
         return result;
     }
 
