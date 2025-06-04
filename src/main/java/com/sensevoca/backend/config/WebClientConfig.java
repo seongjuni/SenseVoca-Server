@@ -18,4 +18,12 @@ public class WebClientConfig {
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
+
+    @Bean("multipartWebClient")
+    public WebClient multipartWebClient()
+    {
+        return WebClient.builder()
+                .baseUrl(aiServerUrl)
+                .build();
+    }
 }

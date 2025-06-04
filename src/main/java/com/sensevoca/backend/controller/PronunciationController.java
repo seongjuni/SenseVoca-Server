@@ -1,0 +1,47 @@
+package com.sensevoca.backend.controller;
+
+import com.sensevoca.backend.dto.ResponseDTO;
+import com.sensevoca.backend.dto.ai.GetPronunciationResponse;
+import com.sensevoca.backend.service.AiService;
+import com.sensevoca.backend.service.PronunciationService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+
+@RestController
+@Tag(name = "evaluate-pronunciation", description = "발음 평가 API")
+@RequestMapping("/api/evaluate-pronunciation")
+@RequiredArgsConstructor
+public class PronunciationController {
+    private final PronunciationService pronunciationService;
+
+    @PostMapping("")
+    public ResponseEntity<ResponseDTO<GetPronunciationResponse>> evaluate_pronunciation(
+            @RequestParam String word,
+            @RequestParam String country,
+            @RequestParam MultipartFile audio)
+    {
+        try
+        {
+            GetPronunciationResponse result = pronunciationService.evaluatePronunciation(word, country, audio);
+            ResponseDTO<GetPronunciationResponse> response = new ResponseDTO<>();
+
+            response.setStatus(true);
+            response.setMessage("발음 평가 성공");
+            response.setData(result);
+            return ResponseEntity.ok(response);
+        }
+        catch (IOException e)
+        {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+}

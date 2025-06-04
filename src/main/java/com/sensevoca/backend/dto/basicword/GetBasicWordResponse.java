@@ -17,4 +17,5 @@ public class GetBasicWordResponse {
     private String exampleEng;
     private String exampleKor;
     private String phonetic;
+    private boolean favorite;        // 즐겨찾기 여부
 }
