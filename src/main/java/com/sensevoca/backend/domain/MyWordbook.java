@@ -48,4 +48,6 @@ public class MyWordbook {
     public void updateLastAccessed() {
         this.lastAccessedAt = LocalDateTime.now();
     }
+    
+    public void updateTitle(String newTitle) { this.title = newTitle; }
 }
