@@ -3,6 +3,7 @@ package com.sensevoca.backend.controller;
 import com.sensevoca.backend.domain.Interest;
 import com.sensevoca.backend.dto.ResponseDTO;
 import com.sensevoca.backend.dto.user.AddUserRequest;
+import com.sensevoca.backend.dto.user.GetUserStatsResponse;
 import com.sensevoca.backend.dto.user.LoginUserRequest;
 import com.sensevoca.backend.dto.user.LoginUserResponse;
 import com.sensevoca.backend.service.UserService;
@@ -12,6 +13,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -80,6 +82,31 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(response);
+    }
+
+    @GetMapping("/status")
+    @Operation(summary = "유저 학습 통계 조회")
+    public ResponseEntity<ResponseDTO<GetUserStatsResponse>> getStatus() {
+        GetUserStatsResponse stats = userService.getUserStats();
+
+        ResponseDTO<GetUserStatsResponse> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("학습 통계 조회 성공");
+        response.setData(stats);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/status/update/{learnedCount}")
+    @Operation(summary = "유저 학습 통계 업데이트")
+    public ResponseEntity<ResponseDTO<Void>> updateStatus(@PathVariable int learnedCount) {
+        userService.updateUserLearnedStats(learnedCount);
+
+        ResponseDTO<Void> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("학습 통계 업데이트 성공");
+
+        return ResponseEntity.ok(response);
     }
 
 //    @PostMapping("/oauth/kakao")
