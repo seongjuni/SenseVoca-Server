@@ -48,6 +48,7 @@ public class SecurityConfig {
                             "/v3/**",
                             "/swagger-ui/**",
                             "/api/users/**",
+                            "/api/interests/**",
                             "/api/basic/**",
                             "/api/users/token").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
