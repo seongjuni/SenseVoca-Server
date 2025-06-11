@@ -27,6 +27,7 @@ public class MyWordbookService {
     private final WordInfoService wordInfoService;
     private final AiService aiService;
 
+    @Transactional
     public Boolean addMyWordbook(AddMyWordbookRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
@@ -51,21 +52,16 @@ public class MyWordbookService {
 
         // 3. 단어 목록 순회하며 예문 처리 및 관계 저장
         for (MyWordRequest wordItem : request.getWords()) {
-            // 1. 단어 정보 준비
-            WordInfo wordInfo;
-            if (wordItem.getWordId() == null) {
-                wordInfo = wordInfoService.findOrGenerateWordInfo(wordItem.getWord(), wordItem.getMeaning());
-            } else {
-                wordInfo = wordInfoRepository.findById(wordItem.getWordId())
-                        .orElseThrow(() -> new IllegalArgumentException("단어를 찾을 수 없습니다: " + wordItem.getWordId()));
-            }
+            WordInfo wordInfo = (wordItem.getWordId() == null)
+                    ? wordInfoService.findOrGenerateWordInfo(wordItem.getWord(), wordItem.getMeaning())
+                    : wordInfoRepository.findById(wordItem.getWordId())
+                    .orElseThrow(() -> new IllegalArgumentException("단어를 찾을 수 없습니다: " + wordItem.getWordId()));
 
-            // 2. 연상 예문, 이미지, 영어/한글 예문 준비
             MyWordMnemonic myWordMnemonic = findOrGenerateMnemonicExample(
                     wordInfo,
                     interest.getInterestId(),
                     wordItem.getMeaning()
-                    );
+            );
 
             myWordRepository.save(
                     MyWord.builder()
