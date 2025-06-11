@@ -3,6 +3,7 @@ package com.sensevoca.backend.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -45,8 +46,18 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "last_learned_date", nullable = false)
+    private LocalDate lastLearnedDate;
+
+    @Column(name = "today_count", nullable = false)
+    private int todayCount = 0;
+
+    @Column(name = "streak_days", nullable = false)
+    private int streakDays = 0;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.lastLearnedDate = LocalDate.now().minusDays(1);
     }
 }
