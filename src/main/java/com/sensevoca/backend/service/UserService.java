@@ -2,6 +2,7 @@ package com.sensevoca.backend.service;
 
 import com.sensevoca.backend.config.jwt.JwtUtil;
 import com.sensevoca.backend.dto.user.AddUserRequest;
+import com.sensevoca.backend.dto.user.GetUserStatsResponse;
 import com.sensevoca.backend.dto.user.LoginUserRequest;
 import com.sensevoca.backend.dto.user.LoginUserResponse;
 import com.sensevoca.backend.domain.Interest;
@@ -11,9 +12,14 @@ import com.sensevoca.backend.domain.User;
 import com.sensevoca.backend.repository.InterestRepository;
 import com.sensevoca.backend.repository.RefreshTokenRepository;
 import com.sensevoca.backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -95,5 +101,48 @@ public class UserService {
 
     public void delete(Long userId) {
         userRepository.deleteById(userId);
+    }
+
+    public GetUserStatsResponse getUserStats() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+        LocalDate today = LocalDate.now();
+        LocalDate lastStudyDate = user.getLastLearnedDate();
+
+        if (!lastStudyDate.isEqual(today)) {
+            user.setTodayCount(0);
+            user.setStreakDays(
+                    lastStudyDate.plusDays(1).isEqual(today)
+                            ? user.getStreakDays()
+                            : 0
+            );
+            userRepository.save(user);
+        }
+
+        return GetUserStatsResponse.builder()
+                .todayCount(user.getTodayCount())
+                .streakDays(user.getStreakDays())
+                .build();
+    }
+
+    @Transactional
+    public void updateUserLearnedStats(int learnedCount) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+        LocalDate today = LocalDate.now();
+
+        user.setLastLearnedDate(today);
+
+        user.setTodayCount(user.getTodayCount() + learnedCount);
+
+        userRepository.save(user);
     }
 }
