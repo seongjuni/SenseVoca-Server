@@ -1,5 +1,6 @@
 package com.sensevoca.backend.controller;
 
+import com.sensevoca.backend.domain.Interest;
 import com.sensevoca.backend.dto.ResponseDTO;
 import com.sensevoca.backend.dto.user.AddUserRequest;
 import com.sensevoca.backend.dto.user.LoginUserRequest;
@@ -7,10 +8,13 @@ import com.sensevoca.backend.dto.user.LoginUserResponse;
 import com.sensevoca.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "users", description = "유저 API")
 @RestController
@@ -27,8 +31,8 @@ public class UserController {
         ResponseDTO<Boolean> response = new ResponseDTO<>();
         response.setStatus(true);
         response.setMessage(success
-                            ? "User registration successful."
-                            : "Email already exists.");
+                            ? "유저 회원가입 성공"
+                            : "이메일이 이미 존재합니다.");
         response.setData(success);
 
         return ResponseEntity
@@ -43,7 +47,7 @@ public class UserController {
 
         ResponseDTO<LoginUserResponse> response = new ResponseDTO<>();
         response.setStatus(true);
-        response.setMessage("User login successful.");
+        response.setMessage("유저 로그인 성공");
         response.setData(loginResponse);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -59,8 +63,8 @@ public class UserController {
         ResponseDTO<Boolean> response = new ResponseDTO<>();
         response.setStatus(true);
         response.setMessage(isDuplicate
-                            ? "This email is already in use."
-                            : "This email is available.");
+                            ? "이 이메일은 이미 사용중입니다."
+                            : "이 이메일은 사용 가능합니다.");
         response.setData(isDuplicate);
 
         return ResponseEntity.ok(response);
@@ -72,7 +76,7 @@ public class UserController {
         userService.delete(id);
         ResponseDTO<Void> response = new ResponseDTO<>();
         response.setStatus(true);
-        response.setMessage("User deletion successful.");
+        response.setMessage("유저 삭제 성공");
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(response);
