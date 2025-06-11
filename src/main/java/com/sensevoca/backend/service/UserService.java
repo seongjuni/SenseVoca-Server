@@ -68,6 +68,7 @@ public class UserService {
         return LoginUserResponse.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
+                .nickname(user.getNickName())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
