@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,25 +52,67 @@ public class MyWordbookService {
         );
 
         // 3. 단어 목록 순회하며 예문 처리 및 관계 저장
-        for (MyWordRequest wordItem : request.getWords()) {
-            WordInfo wordInfo = (wordItem.getWordId() == null)
-                    ? wordInfoService.findOrGenerateWordInfo(wordItem.getWord(), wordItem.getMeaning())
-                    : wordInfoRepository.findById(wordItem.getWordId())
-                    .orElseThrow(() -> new IllegalArgumentException("단어를 찾을 수 없습니다: " + wordItem.getWordId()));
+        long startTime = System.currentTimeMillis();
 
-            MyWordMnemonic myWordMnemonic = findOrGenerateMnemonicExample(
-                    wordInfo,
-                    interest.getInterestId(),
-                    wordItem.getMeaning()
-            );
+//        /*동기*/
+//        for (MyWordRequest wordItem : request.getWords()) {
+//            WordInfo wordInfo = (wordItem.getWordId() == null)
+//                    ? wordInfoService.findOrGenerateWordInfo(wordItem.getWord(), wordItem.getMeaning())
+//                    : wordInfoRepository.findById(wordItem.getWordId())
+//                    .orElseThrow(() -> new IllegalArgumentException("단어를 찾을 수 없습니다: " + wordItem.getWordId()));
+//
+//            MyWordMnemonic myWordMnemonic = findOrGenerateMnemonicExample(
+//                    wordInfo,
+//                    interest.getInterestId(),
+//                    wordItem.getMeaning()
+//            );
+//
+//            myWordRepository.save(
+//                    MyWord.builder()
+//                            .myWordbook(wordbook)
+//                            .myWordMnemonic(myWordMnemonic)
+//                            .build()
+//            );
+//        }
+//
+//        long endTime = System.currentTimeMillis();
+//        System.out.println("⏱ 동기 처리 시간(ms): " + (endTime - startTime));
+//        /*동기*/
 
-            myWordRepository.save(
-                    MyWord.builder()
+        /*비동기*/
+        List<MyWordRequest> words = request.getWords();
+
+        List<CompletableFuture<MyWord>> futures = words.stream()
+                .map(wordItem -> CompletableFuture.supplyAsync(() -> {
+                    WordInfo wordInfo = (wordItem.getWordId() == null)
+                            ? wordInfoService.findOrGenerateWordInfo(wordItem.getWord(), wordItem.getMeaning())
+                            : wordInfoRepository.findById(wordItem.getWordId())
+                            .orElseThrow(() -> new IllegalArgumentException("단어를 찾을 수 없습니다: " + wordItem.getWordId()));
+
+                    MyWordMnemonic mnemonic = findOrGenerateMnemonicExample(
+                            wordInfo,
+                            interest.getInterestId(),
+                            wordItem.getMeaning()
+                    );
+
+                    return MyWord.builder()
                             .myWordbook(wordbook)
-                            .myWordMnemonic(myWordMnemonic)
-                            .build()
-            );
+                            .myWordMnemonic(mnemonic)
+                            .build();
+                }))
+                .toList();
+
+        List<MyWord> myWords = futures.stream()
+                .map(CompletableFuture::join)
+                .toList();
+
+        for (MyWord word : myWords) {
+            myWordRepository.save(word);
         }
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("🚀 비동기 처리 시간(ms): " + (endTime - startTime));
+        /*비동기*/
 
         return true;
     }
