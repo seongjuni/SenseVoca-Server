@@ -1,5 +1,6 @@
 package com.sensevoca.backend.service;
 
+import com.sensevoca.backend.dto.ai.CreateMnemonicExampleResponse;
 import com.sensevoca.backend.dto.mywordbook.*;
 import com.sensevoca.backend.domain.*;
 import com.sensevoca.backend.dto.wordinfo.GetWordInfosResponse;
@@ -315,5 +316,38 @@ public class MyWordbookService {
 
         wordbook.updateTitle(title);
         return true;
+    }
+
+    @Transactional
+    public RegenerateMnemonicExampleResponse regenerateMnemonicExample(Long wordId, String word) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        // 1. 단어 존재 여부 확인
+        MyWord myWord = myWordRepository.findById(wordId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 단어를 찾을 수 없습니다."));
+
+        // 2. 사용자 권한 확인
+        if (!myWord.getMyWordbook().getUser().getUserId().equals(userId)) {
+            throw new IllegalStateException("자신의 단어만 수정할 수 있습니다.");
+        }
+
+        // 4. AI를 통해 새로운 예문 요청
+        MyWordMnemonic aiGenerated = aiService.regenerateMnemonicExample(word, myWord.getMyWordMnemonic().getMeaning(), myWord.getMyWordMnemonic().getAssociation());
+
+        // 5. 기존 MyWordMnemonic을 업데이트 (ID는 유지하고 내용만 교체)
+        MyWordMnemonic original = myWord.getMyWordMnemonic();
+        original.setAssociation(aiGenerated.getAssociation());
+        original.setImageUrl(aiGenerated.getImageUrl());
+
+        // 6. 저장
+        myWordMnemonicRepository.save(original);
+
+        // 7. 응답 반환
+        return RegenerateMnemonicExampleResponse.builder()
+                .word(word)
+                .association(original.getAssociation())
+                .imageUrl(original.getImageUrl())
+                .build();
     }
 }
