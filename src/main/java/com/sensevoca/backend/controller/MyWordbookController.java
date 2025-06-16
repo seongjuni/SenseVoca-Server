@@ -1,5 +1,6 @@
 package com.sensevoca.backend.controller;
 
+import com.sensevoca.backend.dto.mywordbook.RegenerateMnemonicExampleResponse;
 import com.sensevoca.backend.dto.mywordbook.*;
 import com.sensevoca.backend.dto.ResponseDTO;
 import com.sensevoca.backend.service.MyWordbookService;
@@ -132,6 +133,21 @@ public class MyWordbookController {
         response.setStatus(true);
         response.setMessage("단어장 이름 수정 완료");
         response.setData(renamed);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/regenerate-example")
+    @Operation(summary = "마음에 들지 않는 예문 다시 생성", description = "단어 ID와 뜻을 기반으로 새로운 예문을 생성합니다.")
+    public ResponseEntity<ResponseDTO<RegenerateMnemonicExampleResponse>> regenerateExample(
+            @RequestBody RegenerateMnemonicExampleRequest request) {
+
+        RegenerateMnemonicExampleResponse newExample = myWordbookService.regenerateMnemonicExample(request.getWordId(), request.getWord());
+
+        ResponseDTO<RegenerateMnemonicExampleResponse> response = new ResponseDTO<>();
+        response.setStatus(true);
+        response.setMessage("예문 재생성 성공");
+        response.setData(newExample);
 
         return ResponseEntity.ok(response);
     }
