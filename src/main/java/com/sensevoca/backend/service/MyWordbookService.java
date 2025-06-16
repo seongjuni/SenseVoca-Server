@@ -189,7 +189,7 @@ public class MyWordbookService {
                 .map(myWord -> {
                     MyWordMnemonic m = myWord.getMyWordMnemonic();
                     return new GetMyWordListResponse(
-                            myWord.getMyWordId(),
+                            myWord.getMyWordMnemonic().getMyWordMnemonicId(),
                             m.getWordInfo().getWord(),
                             m.getMeaning()
                     );
@@ -205,33 +205,28 @@ public class MyWordbookService {
         return result;
     }
 
-    public List<GetMyWordInfoResponse> getMyWordInfoList(List<Long> wordIds, String phoneticType) {
+    public List<GetMyWordInfoResponse> getMyWordInfoList(List<Long> mnemonicIds, String phoneticType) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
 
-        List<MyWord> myWords = myWordRepository.findAllById(wordIds);
+        // 1. 니모닉 아이디로 MyWordMnemonic 조회
+        List<MyWordMnemonic> mnemonics = myWordMnemonicRepository.findAllById(mnemonicIds);
 
-        // 즐겨찾기된 myWordMnemonicId를 한 번에 조회
+        // 2. 즐겨찾기된 myWordMnemonicId 조회
         Set<Long> favoriteMnemonicIds = favoriteWordRepository
-                .findAllByUser_UserIdAndMyWordMnemonic_MyWordMnemonicIdIn(
-                        userId,
-                        myWords.stream()
-                                .map(word -> word.getMyWordMnemonic().getMyWordMnemonicId())
-                                .toList()
-                )
+                .findAllByUser_UserIdAndMyWordMnemonic_MyWordMnemonicIdIn(userId, mnemonicIds)
                 .stream()
                 .map(fav -> fav.getMyWordMnemonic().getMyWordMnemonicId())
                 .collect(Collectors.toSet());
 
-        return myWords.stream()
-                .map(myWord -> {
-                    MyWordMnemonic mnemonic = myWord.getMyWordMnemonic();
+        // 3. 응답 생성
+        return mnemonics.stream()
+                .map(mnemonic -> {
                     WordInfo wordInfo = mnemonic.getWordInfo();
                     String phoneticSymbol = switch (phoneticType.toLowerCase()) {
-                        case "us" -> wordInfo.getPhoneticUs();
                         case "uk" -> wordInfo.getPhoneticUk();
                         case "aus" -> wordInfo.getPhoneticAus();
-                        default -> wordInfo.getPhoneticUs(); // 기본 미국식
+                        default -> wordInfo.getPhoneticUs();
                     };
 
                     boolean isFavorite = favoriteMnemonicIds.contains(mnemonic.getMyWordMnemonicId());
