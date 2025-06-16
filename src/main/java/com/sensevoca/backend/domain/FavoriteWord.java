@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Table(name = "favorite_word",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"user_id", "my_word_mnemonic_id"}),
-                @UniqueConstraint(columnNames = {"user_id", "basic_word_id"})
+                @UniqueConstraint(columnNames = {"user_id", "dayword_id"})
         }
 )
 @Getter
@@ -35,8 +35,8 @@ public class FavoriteWord {
 
     // basic_word와 연관 (nullable)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "basic_word_id")
-    private BasicWord basicWord;
+    @JoinColumn(name = "dayword_id")
+    private Dayword dayword;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -48,7 +48,7 @@ public class FavoriteWord {
 
     @AssertTrue(message = "myWordMnemonic 또는 basicWord 중 하나만 있어야 합니다.")
     public boolean isOnlyOneSet() {
-        return (myWordMnemonic != null && basicWord == null)
-                || (myWordMnemonic == null && basicWord != null);
+        return (myWordMnemonic != null && dayword == null)
+                || (myWordMnemonic == null && dayword != null);
     }
 }

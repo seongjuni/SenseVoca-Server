@@ -109,14 +109,12 @@ public class BasicService {
 
         // 즐겨찾기된 myWordMnemonicId를 한 번에 조회
         Set<Long> favoriteBasicIds = favoriteWordRepository
-                .findAllByUser_UserIdAndBasicWord_BasicWordIdIn(
+                .findAllByUser_UserIdAndDayword_DaywordIdIn(
                         userId,
-                        daywordDetail.stream()
-                                .map(word -> word.getBasicWord().getBasicWordId())
-                                .toList()
+                        daywordIdList
                 )
                 .stream()
-                .map(fav -> fav.getBasicWord().getBasicWordId())
+                .map(fav -> fav.getDayword().getDaywordId())
                 .collect(Collectors.toSet());
 
         return daywordDetail.stream().map(dayword -> {
@@ -132,7 +130,7 @@ public class BasicService {
                 default -> wordInfo.getPhoneticUs();
             };
 
-            boolean isFavorite = favoriteBasicIds.contains(basicWord.getBasicWordId());
+            boolean isFavorite = favoriteBasicIds.contains(dayword.getDaywordId());
 
             return GetBasicWordResponse.builder()
                     .daywordId(dayword.getDaywordId())
