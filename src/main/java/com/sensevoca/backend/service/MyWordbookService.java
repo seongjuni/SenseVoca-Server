@@ -209,19 +209,26 @@ public class MyWordbookService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
 
-        // 1. 니모닉 아이디로 MyWordMnemonic 조회
+        // 1. 니모닉 ID로 전체 조회 (순서 보장 안됨)
         List<MyWordMnemonic> mnemonics = myWordMnemonicRepository.findAllById(mnemonicIds);
 
-        // 2. 즐겨찾기된 myWordMnemonicId 조회
+        // 2. Map으로 변환: id → mnemonic
+        Map<Long, MyWordMnemonic> mnemonicMap = mnemonics.stream()
+                .collect(Collectors.toMap(MyWordMnemonic::getMyWordMnemonicId, m -> m));
+
+        // 3. 즐겨찾기된 ID 조회
         Set<Long> favoriteMnemonicIds = favoriteWordRepository
                 .findAllByUser_UserIdAndMyWordMnemonic_MyWordMnemonicIdIn(userId, mnemonicIds)
                 .stream()
                 .map(fav -> fav.getMyWordMnemonic().getMyWordMnemonicId())
                 .collect(Collectors.toSet());
 
-        // 3. 응답 생성
-        return mnemonics.stream()
-                .map(mnemonic -> {
+        // 4. 원래 전달받은 ID 순서대로 정렬 및 응답 생성
+        return mnemonicIds.stream()
+                .map(id -> {
+                    MyWordMnemonic mnemonic = mnemonicMap.get(id);
+                    if (mnemonic == null) return null; // 혹은 throw 예외 처리
+
                     WordInfo wordInfo = mnemonic.getWordInfo();
                     String phoneticSymbol = switch (phoneticType.toLowerCase()) {
                         case "uk" -> wordInfo.getPhoneticUk();
@@ -229,10 +236,10 @@ public class MyWordbookService {
                         default -> wordInfo.getPhoneticUs();
                     };
 
-                    boolean isFavorite = favoriteMnemonicIds.contains(mnemonic.getMyWordMnemonicId());
+                    boolean isFavorite = favoriteMnemonicIds.contains(id);
 
                     return GetMyWordInfoResponse.builder()
-                            .mnemonicId(mnemonic.getMyWordMnemonicId())
+                            .mnemonicId(id)
                             .word(wordInfo.getWord())
                             .meaning(mnemonic.getMeaning())
                             .phoneticSymbol(phoneticSymbol)
@@ -243,6 +250,7 @@ public class MyWordbookService {
                             .favorite(isFavorite)
                             .build();
                 })
+                .filter(Objects::nonNull) // 혹시 null이 있을 경우 제거
                 .toList();
     }
 
