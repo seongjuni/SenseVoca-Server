@@ -111,21 +111,16 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
         LocalDate today = LocalDate.now();
-        LocalDate lastStudyDate = user.getLastLearnedDate();
+        LocalDate lastDate = user.getLastLearnedDate();
 
-        if (!lastStudyDate.isEqual(today)) {
-            user.setTodayCount(0);
-            user.setStreakDays(
-                    lastStudyDate.plusDays(1).isEqual(today)
-                            ? user.getStreakDays()
-                            : 0
-            );
-            userRepository.save(user);
+        int visibleStreak = user.getStreakDays();
+        if (lastDate != null && lastDate.isBefore(today.minusDays(1))) {
+            visibleStreak = 0; // 계산만 하고 저장은 하지 않음
         }
 
         return GetUserStatsResponse.builder()
                 .todayCount(user.getTodayCount())
-                .streakDays(user.getStreakDays())
+                .streakDays(visibleStreak)
                 .build();
     }
 
@@ -138,9 +133,19 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
         LocalDate today = LocalDate.now();
+        LocalDate lastDate = user.getLastLearnedDate();
 
+        // 🎯 streakDays 처리
+        if (lastDate == null) {
+            user.setStreakDays(1); // 첫 학습
+        } else if (lastDate.equals(today.minusDays(1))) {
+            user.setStreakDays(user.getStreakDays() + 1); // 연속 학습
+        } else if (!lastDate.equals(today)) {
+            user.setStreakDays(1); // 연속 실패 또는 오늘 첫 학습
+        }
+
+        // 🎯 날짜, 학습 단어 수 갱신
         user.setLastLearnedDate(today);
-
         user.setTodayCount(user.getTodayCount() + learnedCount);
 
         userRepository.save(user);
