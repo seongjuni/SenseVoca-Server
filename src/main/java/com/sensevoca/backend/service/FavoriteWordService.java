@@ -23,6 +23,7 @@ public class FavoriteWordService {
     private final UserRepository userRepository;
     private final MyWordMnemonicRepository myWordMnemonicRepository;
     private final BasicWordRepository basicWordRepository;
+    private final DaywordRepository daywordRepository;
     private final MyWordRepository myWordRepository;
 
     public List<GetFavoriteWordsResponse> getFavoriteWordsByUser() {
@@ -42,11 +43,11 @@ public class FavoriteWordService {
                                 .type("MY")
                                 .build();
                     } else {
-                        WordInfo wordInfo = fav.getBasicWord().getWordInfo();
+                        WordInfo wordInfo = fav.getDayword().getBasicWord().getWordInfo();
                         return GetFavoriteWordsResponse.builder()
-                                .wordId(fav.getBasicWord().getBasicWordId())
+                                .wordId(fav.getDayword().getDaywordId())
                                 .word(wordInfo.getWord())
-                                .meaning(fav.getBasicWord().getMeaning())
+                                .meaning(fav.getDayword().getBasicWord().getMeaning())
                                 .type("BASIC")
                                 .build();
                     }
@@ -78,7 +79,7 @@ public class FavoriteWordService {
         favoriteWordRepository.save(favorite);
     }
 
-    public void addBasicWordFavorite(Long basicWordId)
+    public void addBasicWordFavorite(Long daywordId)
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
@@ -88,15 +89,15 @@ public class FavoriteWordService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
         // 2. 기본 단어장 조회
-        BasicWord basicWord = basicWordRepository.findById(basicWordId)
+        Dayword dayword = daywordRepository.findById(daywordId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 기본 단어가 존재하지 않습니다."));
 
-        if (favoriteWordRepository.existsByUser_UserIdAndBasicWord_BasicWordId(userId, basicWordId))
+        if (favoriteWordRepository.existsByUser_UserIdAndDayword_DaywordId(userId, daywordId))
             throw new IllegalStateException("이미 즐겨찾기 되어 있음");
 
         FavoriteWord favorite = FavoriteWord.builder()
                 .user(user)
-                .basicWord(basicWord)
+                .dayword(dayword)
                 .build();
 
         favoriteWordRepository.save(favorite);
@@ -115,13 +116,13 @@ public class FavoriteWordService {
         favoriteWordRepository.delete(favorite);
     }
 
-    public void removeBasicWordFavorite(Long basicWordId)
+    public void removeBasicWordFavorite(Long daywordId)
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
 
         Optional<FavoriteWord> optionalFavorite = favoriteWordRepository.
-                findByUser_UserIdAndBasicWord_BasicWordId(userId, basicWordId);
+                findByUser_UserIdAndDayword_DaywordId(userId, daywordId);
 
         FavoriteWord favorite = optionalFavorite
                 .orElseThrow(() -> new IllegalArgumentException("즐겨찾기 항목이 존재하지 않습니다."));
@@ -151,11 +152,11 @@ public class FavoriteWordService {
                 .collect(Collectors.toSet());
 
         // BASIC 즐겨찾기 ID 수집
-        Set<Long> favoriteBasicWordIds = favoriteWordRepository
+        Set<Long> favoriteDaywordIds = favoriteWordRepository
                 .findAllByUser_UserIdOrderByCreatedAtAsc(userId).stream()
                 .map(fav -> {
-                    BasicWord basicWord = fav.getBasicWord();
-                    return basicWord != null ? basicWord.getBasicWordId() : null;
+                    Dayword dayword = fav.getDayword();
+                    return dayword != null ? dayword.getDaywordId() : null;
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
@@ -191,9 +192,10 @@ public class FavoriteWordService {
             }
 
             else if ("BASIC".equals(type)) {
-                BasicWord basicWord = basicWordRepository.findById(req.getWordId())
-                        .orElseThrow(() -> new IllegalArgumentException("기본 단어가 존재하지 않습니다."));
+                Dayword dayword = daywordRepository.findById(req.getWordId())
+                        .orElseThrow(() -> new IllegalArgumentException("해당 dayword가 존재하지 않습니다."));
 
+                BasicWord basicWord = dayword.getBasicWord();
                 WordInfo wordInfo = basicWord.getWordInfo();
 
                 String phonetic = switch (phoneticType.toLowerCase()) {
@@ -203,7 +205,7 @@ public class FavoriteWordService {
                 };
 
                 GetBasicWordResponse data = GetBasicWordResponse.builder()
-                        .daywordId(basicWord.getBasicWordId())
+                        .daywordId(dayword.getDaywordId())
                         .word(wordInfo.getWord())
                         .meaning(basicWord.getMeaning())
                         .association(basicWord.getAssociation())
@@ -211,7 +213,7 @@ public class FavoriteWordService {
                         .exampleEng(basicWord.getExampleEng())
                         .exampleKor(basicWord.getExampleKor())
                         .phonetic(phonetic)
-                        .favorite(favoriteBasicWordIds.contains(basicWord.getBasicWordId()))
+                        .favorite(favoriteDaywordIds.contains(dayword.getDaywordId()))
                         .build();
 
                 result.add(new FavoriteWordDetailResponse("BASIC", data));
