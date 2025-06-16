@@ -8,6 +8,7 @@ import com.sensevoca.backend.dto.ai.GetPronunciationResponse;
 import com.sensevoca.backend.domain.Interest;
 import com.sensevoca.backend.dto.ai.GetWordPhoneticsRequest;
 import com.sensevoca.backend.dto.ai.GetWordPhoneticsResponse;
+import com.sensevoca.backend.dto.mywordbook.RegenerateMnemonicExampleResponse;
 import com.sensevoca.backend.repository.InterestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -85,5 +86,24 @@ public class AiService {
                 .retrieve()
                 .bodyToMono(GetPronunciationResponse.class)
                 .block();
+    }
+
+
+    public MyWordMnemonic regenerateMnemonicExample(String word, String meaning, String association) {
+        RegenerateMnemonicExampleResponse request = new RegenerateMnemonicExampleResponse(word, meaning, association);
+
+        RegenerateMnemonicExampleResponse response = webClient.post()
+                .uri("/api/v1/ai/regenerate-mnemonic") // 🔁 이 경로는 실제 이미지 생성용 API의 경로로 수정 필요
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(RegenerateMnemonicExampleResponse.class)
+                .block();
+
+
+        return MyWordMnemonic.builder()
+                .association(response.getAssociation())
+                .imageUrl(response.getImageUrl())
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 }
