@@ -135,7 +135,7 @@ public class BasicService {
             boolean isFavorite = favoriteBasicIds.contains(basicWord.getBasicWordId());
 
             return GetBasicWordResponse.builder()
-                    .basicWordId(basicWord.getBasicWordId())
+                    .daywordId(dayword.getDaywordId())
                     .word(wordInfo.getWord())
                     .meaning(basicWord.getMeaning())
                     .association(basicWord.getAssociation())

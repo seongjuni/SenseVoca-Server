@@ -203,7 +203,7 @@ public class FavoriteWordService {
                 };
 
                 GetBasicWordResponse data = GetBasicWordResponse.builder()
-                        .basicWordId(basicWord.getBasicWordId())
+                        .daywordId(basicWord.getBasicWordId())
                         .word(wordInfo.getWord())
                         .meaning(basicWord.getMeaning())
                         .association(basicWord.getAssociation())

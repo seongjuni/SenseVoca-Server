@@ -9,7 +9,7 @@ import lombok.Getter;
 @Builder
 public class GetBasicWordResponse {
 
-    private Long basicWordId;
+    private Long daywordId;
     private String word;    // word_info
     private String meaning;
     private String association;
