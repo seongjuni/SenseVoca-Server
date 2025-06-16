@@ -85,26 +85,32 @@ public class MyWordbookService {
 
         List<CompletableFuture<MyWord>> futures = words.stream()
                 .map(wordItem -> CompletableFuture.supplyAsync(() -> {
-                    WordInfo wordInfo = (wordItem.getWordId() == null)
-                            ? wordInfoService.findOrGenerateWordInfo(wordItem.getWord(), wordItem.getMeaning())
-                            : wordInfoRepository.findById(wordItem.getWordId())
-                            .orElseThrow(() -> new IllegalArgumentException("단어를 찾을 수 없습니다: " + wordItem.getWordId()));
+                    try {
+                        WordInfo wordInfo = (wordItem.getWordId() == null)
+                                ? wordInfoService.findOrGenerateWordInfo(wordItem.getWord(), wordItem.getMeaning())
+                                : wordInfoRepository.findById(wordItem.getWordId())
+                                .orElseThrow(() -> new IllegalArgumentException("단어를 찾을 수 없습니다: " + wordItem.getWordId()));
 
-                    MyWordMnemonic mnemonic = findOrGenerateMnemonicExample(
-                            wordInfo,
-                            interest.getInterestId(),
-                            wordItem.getMeaning()
-                    );
+                        MyWordMnemonic mnemonic = findOrGenerateMnemonicExample(
+                                wordInfo,
+                                interest.getInterestId(),
+                                wordItem.getMeaning()
+                        );
 
-                    return MyWord.builder()
-                            .myWordbook(wordbook)
-                            .myWordMnemonic(mnemonic)
-                            .build();
+                        return MyWord.builder()
+                                .myWordbook(wordbook)
+                                .myWordMnemonic(mnemonic)
+                                .build();
+                    } catch (Exception e) {
+                        System.out.println("🟥 단어 처리 실패: " + wordItem.getWord() + " / 이유: " + e.getMessage());
+                        return null;  // 실패 시 null 반환
+                    }
                 }))
                 .toList();
 
         List<MyWord> myWords = futures.stream()
                 .map(CompletableFuture::join)
+                .filter(Objects::nonNull)  // 실패한 단어(null) 제외
                 .toList();
 
         for (MyWord word : myWords) {
