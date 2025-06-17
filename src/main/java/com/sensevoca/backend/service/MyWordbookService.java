@@ -354,7 +354,6 @@ public class MyWordbookService {
 
         // 7. 응답 반환
         return RegenerateMnemonicExampleResponse.builder()
-                .word(word)
                 .association(original.getAssociation())
                 .imageUrl(original.getImageUrl())
                 .build();
