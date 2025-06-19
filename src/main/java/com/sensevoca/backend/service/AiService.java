@@ -85,8 +85,8 @@ public class AiService {
     }
 
 
-    public MyWordMnemonic regenerateMnemonicExample(String word, String meaning, String association) {
-        RegenerateMnemonicRequest request = new RegenerateMnemonicRequest(word, meaning, association);
+    public MyWordMnemonic regenerateMnemonicExample(String word, MyWordMnemonic myWordMnemonic) {
+        RegenerateMnemonicRequest request = new RegenerateMnemonicRequest(word, myWordMnemonic.getMeaning(), myWordMnemonic.getAssociation());
 
         RegenerateMnemonicResponse response = webClient.post()
                 .uri("/api/v1/ai/regenerate-mnemonic") // 🔁 이 경로는 실제 이미지 생성용 API의 경로로 수정 필요
@@ -97,7 +97,12 @@ public class AiService {
 
 
         return MyWordMnemonic.builder()
+                .wordInfo(myWordMnemonic.getWordInfo())
+                .interest(myWordMnemonic.getInterest())
+                .meaning(myWordMnemonic.getMeaning())
                 .association(response.getAssociation())
+                .exampleKor(myWordMnemonic.getExampleKor())
+                .exampleEng(myWordMnemonic.getExampleEng())
                 .imageUrl(response.getImageUrl())
                 .createdAt(LocalDateTime.now())
                 .build();

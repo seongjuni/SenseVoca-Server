@@ -339,8 +339,7 @@ public class MyWordbookService {
         // 2. AI로 새 예문 생성
         MyWordMnemonic newMnemonic = aiService.regenerateMnemonicExample(
                 word,
-                oldMnemonic.getMeaning(),
-                oldMnemonic.getAssociation()  // 기존 예문을 참고용으로 넘긴 경우
+                oldMnemonic
         );
 
         // 3. 새 예문 저장
