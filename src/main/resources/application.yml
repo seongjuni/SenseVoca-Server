@@ -14,4 +14,4 @@ spring:
 
 ai:
   server:
-    url: http://localhost:8000
+    url: http://54.153.135.2:8000

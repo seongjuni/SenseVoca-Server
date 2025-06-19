@@ -332,30 +332,34 @@ public class MyWordbookService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) authentication.getPrincipal();
 
-        // 1. 단어 존재 여부 확인
-        MyWord myWord = myWordRepository.findById(wordId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 단어를 찾을 수 없습니다."));
+        // 1. 기존 니모닉 예문 조회
+        MyWordMnemonic oldMnemonic = myWordMnemonicRepository.findById(wordId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 예문(Mnemonic)을 찾을 수 없습니다."));
 
-        // 2. 사용자 권한 확인
-        if (!myWord.getMyWordbook().getUser().getUserId().equals(userId)) {
-            throw new IllegalStateException("자신의 단어만 수정할 수 있습니다.");
+        // 2. AI로 새 예문 생성
+        MyWordMnemonic newMnemonic = aiService.regenerateMnemonicExample(
+                word,
+                oldMnemonic.getMeaning(),
+                oldMnemonic.getAssociation()  // 기존 예문을 참고용으로 넘긴 경우
+        );
+
+        // 3. 새 예문 저장
+        MyWordMnemonic savedMnemonic = myWordMnemonicRepository.save(newMnemonic);
+
+        // 4. 이 예문을 참조하고 있는 모든 MyWord 조회
+        List<MyWord> myWords = myWordRepository
+                .findAllByMyWordMnemonic_MyWordMnemonicIdAndMyWordbook_User_UserId(wordId, userId);
+
+        // 5. 각 MyWord의 예문 참조를 새 것으로 교체
+        for (MyWord myWord : myWords) {
+            myWord.setMyWordMnemonic(savedMnemonic);
         }
+        myWordRepository.saveAll(myWords);
 
-        // 4. AI를 통해 새로운 예문 요청
-        MyWordMnemonic aiGenerated = aiService.regenerateMnemonicExample(word, myWord.getMyWordMnemonic().getMeaning(), myWord.getMyWordMnemonic().getAssociation());
-
-        // 5. 기존 MyWordMnemonic을 업데이트 (ID는 유지하고 내용만 교체)
-        MyWordMnemonic original = myWord.getMyWordMnemonic();
-        original.setAssociation(aiGenerated.getAssociation());
-        original.setImageUrl(aiGenerated.getImageUrl());
-
-        // 6. 저장
-        myWordMnemonicRepository.save(original);
-
-        // 7. 응답 반환
+        // 6. 응답 반환
         return RegenerateMnemonicExampleResponse.builder()
-                .association(original.getAssociation())
-                .imageUrl(original.getImageUrl())
+                .association(savedMnemonic.getAssociation())
+                .imageUrl(savedMnemonic.getImageUrl())
                 .build();
     }
 }

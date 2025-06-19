@@ -10,4 +10,5 @@ import java.util.List;
 public interface MyWordRepository extends JpaRepository<MyWord, Long> {
 
     List<MyWord> findAllByMyWordbookMyWordbookId(Long wordbookId);
+    List<MyWord> findAllByMyWordMnemonic_MyWordMnemonicIdAndMyWordbook_User_UserId(Long wordId, Long userId);
 }
